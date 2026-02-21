@@ -8,6 +8,9 @@ export interface Patient {
   tir: number;
   status: 'critical' | 'warning' | 'stable';
   lastUpdate: string;
+  clinicalHistory?: string;
+  currentMedication?: string[];
+  lastExamDate?: string;
 }
 
 export interface AuditLog {
@@ -28,4 +31,16 @@ export interface Notification {
   message: string;
   timestamp: string;
   isFiltered: boolean;
+}
+
+export interface AppState {
+  currentView: 'home' | 'patients' | 'audit' | 'settings' | 'profile';
+  selectedPatientId?: string;
+  isLoggedIn: boolean;
+  sidecarThresholds: {
+    maxInsulinDose: number;
+    hypoThreshold: number;
+    hyperThreshold: number;
+    stackingHours: number;
+  };
 }

@@ -1,197 +1,481 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { 
+  Home, 
+  Users, 
+  ShieldCheck, 
+  Settings as SettingsIcon, 
+  User, 
+  Bell, 
+  Menu, 
+  X, 
+  Search,
+  ChevronRight,
+  LogOut,
+  Plus,
+  AlertCircle
+} from 'lucide-react';
 import { MOCK_PATIENTS, MOCK_NOTIFICATIONS } from '@/lib/mockData';
 import { validateRecommendation } from '@/lib/sidecarLogic';
 import PatientCard from '@/components/PatientCard';
 import SidecarAudit from '@/components/SidecarAudit';
 import NotificationTray from '@/components/NotificationTray';
-import { 
-  Activity, 
-  Users, 
-  ShieldCheck, 
-  History, 
-  Zap, 
-  Settings, 
-  Search,
-  AlertTriangle,
-  Stethoscope,
-  Clock,
-  Cpu
-} from 'lucide-react';
 
-export default function Dashboard() {
-  const [viewMode, setViewMode] = useState<'realtime' | 'retrospective'>('realtime');
-  const [selectedPatientId, setSelectedPatientId] = useState('2');
-  const [simulationState, setSimulationState] = useState({
-    llmDose: 2,
-    lastDoseHours: 1.5,
-  });
-
-  const selectedPatient = MOCK_PATIENTS.find(p => p.id === selectedPatientId) || MOCK_PATIENTS[0];
+// Main Application Component
+export default function SofIAApp() {
+  const [currentView, setCurrentView] = useState<'home' | 'patients' | 'audit' | 'settings'>('home');
+  const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   
-  const auditResult = validateRecommendation(
-    selectedPatient.glucose, 
-    simulationState.llmDose, 
-    simulationState.lastDoseHours
-  );
+  // Simulation for Audit logic
+  const [llmDose, setLlmDose] = useState(2);
+  const [lastDoseHours, setLastDoseHours] = useState(1.5);
 
-  const mockAudit = {
-    id: 'dynamic-audit',
-    patientId: selectedPatient.id,
-    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    llmRecommendation: simulationState.llmDose > 0 
-      ? `Sugerir dosis correctiva de ${simulationState.llmDose} unidades de insulina rápida.` 
-      : "Continuar monitoreo pasivo.",
-    guardrailStatus: auditResult.status,
-    guardrailReason: auditResult.reason,
-    intervention: auditResult.intervention,
-    clinicalGuideline: auditResult.ruleApplied ? `Arquitectura Sof-IA: ${auditResult.ruleApplied}` : 'Protocolo Estándar GPC'
-  };
+  const selectedPatient = MOCK_PATIENTS.find(p => p.id === selectedPatientId);
 
-  return (
-    <div className="min-h-screen bg-slate-100 font-sans text-slate-900">
-      <header className="bg-slate-900 text-white p-4 shadow-xl border-b-4 border-blue-500 sticky top-0 z-50">
-        <div className="max-w-[1600px] mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="flex items-center gap-3">
-            <div className="bg-blue-600 p-2 rounded-lg">
-              <Activity className="text-white" size={24} />
+  // Authentication Guard (Simulated)
+  if (!isLoggedIn) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6">
+        <div className="max-w-md w-full bg-white rounded-3xl p-8 shadow-2xl">
+          <div className="flex justify-center mb-6">
+             <div className="bg-blue-600 p-4 rounded-2xl">
+                <ShieldCheck className="text-white" size={40} />
+             </div>
+          </div>
+          <h1 className="text-3xl font-black text-center text-slate-900 tracking-tighter mb-2">Sof-IA Portal</h1>
+          <p className="text-center text-slate-500 text-sm mb-8 uppercase font-bold tracking-widest">Acceso Clínico Bio-Seguro</p>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="text-[10px] font-bold text-slate-400 uppercase ml-1">Identificación Médica</label>
+              <input type="text" placeholder="ID Registro" className="w-full mt-1 p-4 bg-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium" defaultValue="DR-JOHANA-2026" />
             </div>
             <div>
-              <h1 className="text-xl font-black tracking-tighter flex items-center gap-2">
-                Sof-IA <span className="text-blue-400 text-xs bg-blue-400/10 px-2 py-0.5 rounded border border-blue-400/20">PoC v1.2</span>
-              </h1>
-              <p className="text-[10px] uppercase font-bold tracking-widest text-slate-400">Telemonitoreo Rural Autónomo-Asistido</p>
+              <label className="text-[10px] font-bold text-slate-400 uppercase ml-1">Contraseña</label>
+              <input type="password" placeholder="••••••••" className="w-full mt-1 p-4 bg-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium" defaultValue="password" />
             </div>
-          </div>
-
-          <div className="flex bg-slate-800 p-1 rounded-xl border border-slate-700">
-            <button onClick={() => setViewMode('retrospective')} className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${viewMode === 'retrospective' ? 'bg-slate-600 text-white shadow-inner' : 'text-slate-400 hover:text-white'}`}>
-              <History size={14} /> VISTA RETROSPECTIVA
-            </button>
-            <button onClick={() => setViewMode('realtime')} className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${viewMode === 'realtime' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}>
-              <Zap size={14} /> VISTA AUTÓNOMA ASISTIDA
+            <button 
+              onClick={() => setIsLoggedIn(true)}
+              className="w-full py-4 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-200"
+            >
+              INGRESAR AL SISTEMA
             </button>
           </div>
-          
-          <div className="flex items-center gap-4 text-xs font-bold">
-            <div className="flex items-center gap-2 text-emerald-400">
-              <ShieldCheck size={16} />
-              SIDECAR ACTIVE
-            </div>
-          </div>
+          <p className="mt-8 text-[10px] text-center text-slate-400 font-medium">
+            SISTEMA CERTIFICADO SaMD CLASS IIa <br/> © 2026 PROYECTO SOF-IA
+          </p>
         </div>
-      </header>
+      </div>
+    );
+  }
 
-      <main className="max-w-[1600px] mx-auto p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
-        
-        <div className="lg:col-span-3 flex flex-col gap-4">
-          <h2 className="font-black text-sm uppercase tracking-wider flex items-center gap-2 px-1">
-            <Users size={18} className="text-blue-600" /> Triaje en Tiempo Real
-          </h2>
-          <div className="space-y-3 overflow-y-auto max-h-[calc(100vh-180px)] pr-2 scrollbar-hide">
-            {MOCK_PATIENTS.map(patient => (
-              <div key={patient.id} onClick={() => setSelectedPatientId(patient.id)} className="cursor-pointer">
-                <PatientCard patient={patient} isSelected={selectedPatientId === patient.id} />
-              </div>
-            ))}
-          </div>
-        </div>
+  // Navigation Data
+  const navItems = [
+    { id: 'home', label: 'Inicio', icon: Home },
+    { id: 'patients', label: 'Pacientes', icon: Users },
+    { id: 'audit', label: 'Auditoría IA', icon: ShieldCheck },
+    { id: 'settings', label: 'Ajustes GPC', icon: SettingsIcon },
+  ];
 
-        <div className="lg:col-span-6 flex flex-col gap-6">
-          <div className="bg-white border-2 border-slate-200 rounded-2xl p-6 shadow-sm">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-black text-slate-800">{selectedPatient.name}</h2>
-              <span className="text-[10px] font-bold bg-slate-100 px-3 py-1 rounded-full text-slate-500 uppercase">Paciente {selectedPatient.id}</span>
-            </div>
-
-            <div className="grid grid-cols-3 gap-4 mb-8">
-              <div className="bg-slate-900 text-white p-4 rounded-xl">
-                <span className="text-[10px] font-bold text-blue-400 uppercase block mb-1">Glucosa Actual</span>
-                <div className="text-3xl font-black">{selectedPatient.glucose} <span className="text-xs">mg/dL</span></div>
-              </div>
-              <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                <span className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Insulina Activa</span>
-                <div className="flex items-center gap-2 font-black text-slate-700">
-                   <Clock size={16} className="text-blue-500" />
-                   {simulationState.lastDoseHours}h
-                </div>
-              </div>
-              <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                <span className="text-[10px] font-bold text-slate-400 uppercase block mb-1">TIR (24h)</span>
-                <div className="text-xl font-black text-slate-700">{selectedPatient.tir}%</div>
-              </div>
-            </div>
-
-            <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-6">
-              <h3 className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-3 flex items-center gap-2">
-                <Cpu size={14} /> Simulador de Intervención (Prueba de Estrés Sidecar)
-              </h3>
-              <div className="flex gap-6">
-                <div className="flex-1">
-                   <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Dosis sugerida por LLM (unidades)</label>
-                   <input 
-                    type="range" min="0" max="50" step="1" 
-                    value={simulationState.llmDose}
-                    onChange={(e) => setSimulationState({...simulationState, llmDose: parseInt(e.target.value)})}
-                    className="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer"
-                   />
-                   <div className="flex justify-between text-[10px] font-bold text-blue-600 mt-1">
-                      <span>0u</span>
-                      <span className="bg-blue-600 text-white px-2 rounded">{simulationState.llmDose}u</span>
-                      <span>50u</span>
-                   </div>
-                </div>
-                <div className="flex-1">
-                   <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Tiempo desde última dosis</label>
-                   <input 
-                    type="range" min="0" max="5" step="0.5" 
-                    value={simulationState.lastDoseHours}
-                    onChange={(e) => setSimulationState({...simulationState, lastDoseHours: parseFloat(e.target.value)})}
-                    className="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer"
-                   />
-                   <div className="flex justify-between text-[10px] font-bold text-blue-600 mt-1">
-                      <span>0h</span>
-                      <span className="bg-blue-600 text-white px-2 rounded">{simulationState.lastDoseHours}h</span>
-                      <span>5h</span>
-                   </div>
-                </div>
-              </div>
-            </div>
-
-            {viewMode === 'realtime' ? (
-              <SidecarAudit audit={mockAudit as any} />
-            ) : (
-              <div className="p-8 border-2 border-dashed border-amber-200 bg-amber-50 rounded-xl text-center">
-                 <History size={40} className="mx-auto text-amber-400 mb-2" />
-                 <p className="font-bold text-amber-800 uppercase text-xs tracking-widest">Modo Histórico: Sin Protección Sidecar</p>
-              </div>
-            )}
+  return (
+    <div className="min-h-screen bg-slate-50 flex">
+      {/* Sidebar - Desktop */}
+      <aside className="hidden lg:flex w-72 bg-slate-900 flex-col border-r border-slate-800 sticky top-0 h-screen">
+        <div className="p-8">
+          <div className="flex items-center gap-3">
+             <div className="bg-blue-600 p-2 rounded-lg">
+                <ShieldCheck className="text-white" size={24} />
+             </div>
+             <h1 className="text-2xl font-black text-white tracking-tighter">Sof-IA</h1>
           </div>
         </div>
 
-        <div className="lg:col-span-3 flex flex-col gap-6">
-           <NotificationTray notifications={MOCK_NOTIFICATIONS} />
-           
-           <div className="bg-slate-900 rounded-2xl p-6 text-white shadow-xl relative overflow-hidden">
-              <h3 className="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em] mb-4">Malla de Reglas Deterministas</h3>
-              <div className="space-y-4">
-                 {[
-                   { id: '1', name: 'Bloqueo Hipoglucemia', active: true },
-                   { id: '2', name: 'Prevención Stacking', active: true },
-                   { id: '3', name: 'Tope Máximo de Dosis', active: true },
-                   { id: '4', name: 'Alerta CAD Sostenida', active: true }
-                 ].map(rule => (
-                   <div key={rule.id} className="flex items-center justify-between p-2 rounded bg-slate-800 border border-slate-700">
-                      <span className="text-[10px] font-bold">R{rule.id}: {rule.name}</span>
-                      <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]" />
-                   </div>
-                 ))}
+        <nav className="flex-1 px-4 space-y-2 mt-4">
+          {navItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => { setCurrentView(item.id as any); setSidebarOpen(false); }}
+              className={`w-full flex items-center gap-4 px-4 py-4 rounded-xl font-bold transition-all ${
+                currentView === item.id ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+              }`}
+            >
+              <item.icon size={20} />
+              {item.label}
+            </button>
+          ))}
+        </nav>
+
+        <div className="p-6">
+           <button 
+            onClick={() => setIsLoggedIn(false)}
+            className="w-full flex items-center gap-4 px-4 py-4 text-red-400 font-bold hover:bg-red-500/10 rounded-xl transition-all"
+           >
+             <LogOut size={20} />
+             Cerrar Sesión
+           </button>
+        </div>
+      </aside>
+
+      {/* Mobile Nav Top Bar */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b flex items-center justify-between px-6 z-50">
+        <button onClick={() => setSidebarOpen(true)} className="p-2 -ml-2">
+          <Menu size={24} className="text-slate-700" />
+        </button>
+        <h1 className="text-xl font-black text-slate-900 tracking-tighter">Sof-IA</h1>
+        <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center font-bold text-xs">JO</div>
+      </div>
+
+      {/* Mobile Drawer */}
+      {sidebarOpen && (
+        <div className="lg:hidden fixed inset-0 z-[60] bg-slate-900/50 backdrop-blur-sm" onClick={() => setSidebarOpen(false)}>
+           <div className="w-80 h-full bg-slate-900 p-6 flex flex-col" onClick={e => e.stopPropagation()}>
+              <div className="flex justify-between items-center mb-10">
+                 <h1 className="text-2xl font-black text-white tracking-tighter">Menu</h1>
+                 <button onClick={() => setSidebarOpen(false)}><X className="text-white" /></button>
               </div>
+              <nav className="flex-1 space-y-4">
+                {navItems.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => { setCurrentView(item.id as any); setSidebarOpen(false); }}
+                    className={`w-full flex items-center gap-4 px-4 py-4 rounded-xl font-bold transition-all ${
+                      currentView === item.id ? 'bg-blue-600 text-white' : 'text-slate-400'
+                    }`}
+                  >
+                    <item.icon size={20} />
+                    {item.label}
+                  </button>
+                ))}
+              </nav>
            </div>
         </div>
+      )}
 
+      {/* Main Content Area */}
+      <main className="flex-1 flex flex-col lg:pt-0 pt-16 h-screen overflow-hidden">
+        
+        {/* Search / Global Header */}
+        <header className="h-20 bg-white border-b border-slate-200 hidden lg:flex items-center justify-between px-10">
+           <div className="flex items-center gap-4 bg-slate-100 px-4 py-2 rounded-xl w-96">
+              <Search size={18} className="text-slate-400" />
+              <input type="text" placeholder="Buscar pacientes o reportes..." className="bg-transparent text-sm font-medium outline-none w-full" />
+           </div>
+           <div className="flex items-center gap-6">
+              <div className="relative">
+                 <Bell size={22} className="text-slate-400" />
+                 <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[8px] flex items-center justify-center text-white font-black">3</span>
+              </div>
+              <div className="flex items-center gap-3">
+                 <div className="text-right">
+                    <p className="text-xs font-black text-slate-900 leading-none">Dra. Johana</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Onzaga, Santander</p>
+                 </div>
+                 <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center border-2 border-white shadow-sm ring-2 ring-blue-50">
+                    <User size={20} className="text-blue-600" />
+                 </div>
+              </div>
+           </div>
+        </header>
+
+        {/* Dynamic Views */}
+        <div className="flex-1 overflow-y-auto p-4 lg:p-10">
+           
+           {/* VIEW: HOME / OVERVIEW */}
+           {currentView === 'home' && (
+             <div className="max-w-6xl mx-auto space-y-8">
+               <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                  <div>
+                    <h2 className="text-4xl font-black text-slate-900 tracking-tighter">Hola, Dra. Johana 👋</h2>
+                    <p className="text-slate-500 font-medium">Hay 10 pacientes activos bajo monitoreo en tiempo real.</p>
+                  </div>
+                  <button className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-100">
+                    <Plus size={20} />
+                    Vincular Nuevo Paciente
+                  </button>
+               </div>
+
+               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                 <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                    <div className="w-12 h-12 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center mb-4">
+                       <AlertCircle size={24} />
+                    </div>
+                    <h3 className="text-3xl font-black text-slate-900 leading-none">3</h3>
+                    <p className="text-sm font-bold text-slate-400 uppercase tracking-widest mt-1">Alertas Críticas</p>
+                 </div>
+                 <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                    <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mb-4">
+                       <Users size={24} />
+                    </div>
+                    <h3 className="text-3xl font-black text-slate-900 leading-none">10</h3>
+                    <p className="text-sm font-bold text-slate-400 uppercase tracking-widest mt-1">Telemonitoreos</p>
+                 </div>
+                 <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                    <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mb-4">
+                       <ShieldCheck size={24} />
+                    </div>
+                    <h3 className="text-3xl font-black text-slate-900 leading-none">100%</h3>
+                    <p className="text-sm font-bold text-slate-400 uppercase tracking-widest mt-1">Sidecar Uptime</p>
+                 </div>
+               </div>
+
+               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                  <div className="lg:col-span-8 space-y-6">
+                    <div className="flex items-center justify-between">
+                       <h3 className="text-lg font-black text-slate-900 tracking-tight">Pacientes con Prioridad</h3>
+                       <button onClick={() => setCurrentView('patients')} className="text-blue-600 text-sm font-bold flex items-center gap-1 hover:underline">Ver todos <ChevronRight size={16}/></button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {MOCK_PATIENTS.slice(0, 4).map(p => (
+                        <div key={p.id} onClick={() => { setSelectedPatientId(p.id); setCurrentView('patients'); }} className="cursor-pointer">
+                          <PatientCard patient={p} />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="lg:col-span-4 h-full">
+                     <NotificationTray notifications={MOCK_NOTIFICATIONS} />
+                  </div>
+               </div>
+             </div>
+           )}
+
+           {/* VIEW: PATIENTS LIST / DETAIL */}
+           {currentView === 'patients' && (
+             <div className="max-w-6xl mx-auto h-full flex flex-col">
+               <div className="flex justify-between items-center mb-8">
+                  <h2 className="text-3xl font-black text-slate-900 tracking-tighter">Gestión de Pacientes</h2>
+                  <div className="flex gap-2 bg-white p-1 rounded-xl border border-slate-200">
+                     <button className="px-4 py-2 text-xs font-bold bg-slate-100 rounded-lg">ACTIVOS</button>
+                     <button className="px-4 py-2 text-xs font-bold text-slate-400">HISTORIAL</button>
+                  </div>
+               </div>
+               
+               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 h-full pb-20">
+                  <div className="lg:col-span-4 overflow-y-auto pr-2 space-y-3 custom-scrollbar">
+                     {MOCK_PATIENTS.map(p => (
+                       <div key={p.id} onClick={() => setSelectedPatientId(p.id)}>
+                         <PatientCard patient={p} isSelected={selectedPatientId === p.id} />
+                       </div>
+                     ))}
+                  </div>
+                  <div className="lg:col-span-8 h-full overflow-y-auto">
+                     {selectedPatient ? (
+                       <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm h-full">
+                          <div className="flex justify-between items-start mb-10">
+                             <div className="flex gap-6 items-center">
+                                <div className="w-20 h-20 bg-blue-100 rounded-3xl flex items-center justify-center text-blue-600 font-black text-2xl border-4 border-white shadow-md">
+                                   {selectedPatient.name.charAt(0)}
+                                </div>
+                                <div>
+                                   <h3 className="text-3xl font-black text-slate-900 tracking-tighter">{selectedPatient.name}</h3>
+                                   <p className="font-bold text-slate-400 uppercase tracking-widest text-xs">{selectedPatient.location} • {selectedPatient.age} años</p>
+                                </div>
+                             </div>
+                             <div className={`px-4 py-2 rounded-full text-xs font-black uppercase tracking-widest border-2 ${
+                               selectedPatient.status === 'critical' ? 'bg-red-50 border-red-200 text-red-600' : 'bg-emerald-50 border-emerald-200 text-emerald-600'
+                             }`}>
+                                {selectedPatient.status}
+                             </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+                             <div className="bg-slate-950 text-white p-8 rounded-3xl relative overflow-hidden">
+                                <div className="absolute top-0 right-0 p-4 opacity-20"><Bell size={40}/></div>
+                                <p className="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em] mb-4">Métrica en Tiempo Real</p>
+                                <div className="flex items-baseline gap-2">
+                                   <span className="text-6xl font-black">{selectedPatient.glucose}</span>
+                                   <span className="text-sm font-bold text-slate-500 uppercase">mg/dL</span>
+                                </div>
+                                <div className="mt-4 flex items-center gap-2 text-xs font-bold text-emerald-400">
+                                   <ChevronRight size={16} className="rotate-[-90deg]" /> 
+                                   Tendencia Estable
+                                </div>
+                             </div>
+                             <div className="bg-blue-600 text-white p-8 rounded-3xl relative overflow-hidden">
+                                <div className="absolute top-0 right-0 p-4 opacity-20"><ShieldCheck size={40}/></div>
+                                <p className="text-[10px] font-black text-blue-100 uppercase tracking-[0.2em] mb-4">Bioseguridad Activa</p>
+                                <div className="text-xl font-black mb-2">Limitador Sidecar</div>
+                                <p className="text-xs font-medium text-blue-100 opacity-80 leading-relaxed">
+                                   El sistema de triaje autónomo está validando los parámetros del gemelo digital contra las GPC de Colombia.
+                                </p>
+                             </div>
+                          </div>
+
+                          <div className="space-y-4">
+                             <h4 className="font-black text-slate-900 uppercase text-xs tracking-widest flex items-center gap-2">
+                                <Plus size={16} className="text-blue-600" /> Acciones Rápidas
+                             </h4>
+                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                {['Ver Historial', 'Reportar Nota', 'Pedir Examen', 'Ajustar Bolo'].map(act => (
+                                  <button key={act} className="p-4 bg-slate-100 rounded-2xl font-bold text-xs text-slate-700 hover:bg-blue-600 hover:text-white transition-all">
+                                     {act}
+                                  </button>
+                                ))}
+                             </div>
+                          </div>
+                       </div>
+                     ) : (
+                       <div className="h-full flex flex-col items-center justify-center text-slate-300 border-4 border-dashed border-slate-100 rounded-3xl p-10 text-center">
+                          <Users size={64} className="mb-4 opacity-20" />
+                          <p className="font-bold text-slate-400">Selecciona un paciente para ver su ficha clínica</p>
+                       </div>
+                     )}
+                  </div>
+               </div>
+             </div>
+           )}
+
+           {/* VIEW: AUDIT SIMULATION */}
+           {currentView === 'audit' && (
+             <div className="max-w-4xl mx-auto space-y-10">
+               <div className="text-center mb-10">
+                 <h2 className="text-3xl font-black text-slate-900 tracking-tighter">Auditoría de IA (SaMD)</h2>
+                 <p className="text-slate-500 font-medium max-w-xl mx-auto mt-2">
+                    Visualiza y pone a prueba el mecanismo de seguridad "Sidecar" que previene errores del modelo de lenguaje.
+                 </p>
+               </div>
+
+               <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm space-y-10">
+                 
+                 {/* Input Simulation Controls */}
+                 <div className="p-8 bg-blue-50 rounded-3xl border border-blue-100">
+                    <h3 className="text-sm font-black text-blue-600 uppercase tracking-[0.2em] mb-8 flex items-center gap-3">
+                       <Menu size={18} /> PANEL DE SIMULACIÓN DE RIESGO
+                    </h3>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                       <div className="space-y-6">
+                          <div>
+                            <div className="flex justify-between items-center mb-4">
+                               <label className="text-xs font-black text-slate-700 uppercase">Sugerencia LLM (Insulina)</label>
+                               <span className="bg-blue-600 text-white text-xs px-3 py-1 rounded-full font-black">{llmDose} unidades</span>
+                            </div>
+                            <input 
+                              type="range" min="0" max="50" step="1" 
+                              value={llmDose}
+                              onChange={(e) => setLlmDose(parseInt(e.target.value))}
+                              className="w-full h-3 bg-blue-200 rounded-full appearance-none cursor-pointer accent-blue-600"
+                            />
+                          </div>
+                          <div>
+                            <div className="flex justify-between items-center mb-4">
+                               <label className="text-xs font-black text-slate-700 uppercase">Insulina Activa (Stacking)</label>
+                               <span className="bg-blue-600 text-white text-xs px-3 py-1 rounded-full font-black">{lastDoseHours}h atrás</span>
+                            </div>
+                            <input 
+                              type="range" min="0" max="5" step="0.5" 
+                              value={lastDoseHours}
+                              onChange={(e) => setLastDoseHours(parseFloat(e.target.value))}
+                              className="w-full h-3 bg-blue-200 rounded-full appearance-none cursor-pointer accent-blue-600"
+                            />
+                          </div>
+                       </div>
+
+                       <div className="bg-white p-6 rounded-2xl border border-blue-100 flex flex-col justify-center">
+                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 text-center">Paciente de Prueba</p>
+                          <select 
+                            className="w-full p-4 bg-slate-100 rounded-xl font-bold outline-none"
+                            onChange={(e) => setSelectedPatientId(e.target.value)}
+                            value={selectedPatientId || '2'}
+                          >
+                             {MOCK_PATIENTS.map(p => <option key={p.id} value={p.id}>{p.name} ({p.glucose} mg/dL)</option>)}
+                          </select>
+                       </div>
+                    </div>
+                 </div>
+
+                 {/* Real Audit Output */}
+                 <div className="pt-6">
+                    <h3 className="text-sm font-black text-slate-900 uppercase tracking-[0.2em] mb-6 flex items-center gap-3">
+                       <ShieldCheck size={20} className="text-emerald-500" /> RESULTADO DE VALIDACIÓN SIDECAR
+                    </h3>
+                    {(() => {
+                       const audit = validateRecommendation(selectedPatient?.glucose || 100, llmDose, lastDoseHours);
+                       const mockAuditFull = {
+                          id: 'sim', patientId: '0', timestamp: 'AHORA',
+                          llmRecommendation: llmDose > 0 ? `Sugerir dosis correctiva de ${llmDose} unidades.` : "Sin acción requerida.",
+                          guardrailStatus: audit.status,
+                          guardrailReason: audit.reason,
+                          clinicalGuideline: `REGLA SOF-IA: ${audit.ruleApplied || 'ESTÁNDAR'}`,
+                          intervention: audit.intervention
+                       };
+                       return <SidecarAudit audit={mockAuditFull as any} />;
+                    })()}
+                 </div>
+               </div>
+             </div>
+           )}
+
+           {/* VIEW: SETTINGS */}
+           {currentView === 'settings' && (
+             <div className="max-w-4xl mx-auto space-y-8 pb-20">
+                <h2 className="text-3xl font-black text-slate-900 tracking-tighter">Parámetros de Seguridad</h2>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                   <div className="bg-white rounded-3xl p-8 border border-slate-200 space-y-6">
+                      <h4 className="font-black text-slate-900 uppercase text-xs tracking-widest">Umbrales Deterministas</h4>
+                      {[
+                        { label: 'Dosis Máxima Permitida', value: '10 unidades', desc: 'Previene sobredosis accidentales del LLM.' },
+                        { label: 'Límite Hipoglucemia', value: '70 mg/dL', desc: 'Punto de bloqueo total de insulina.' },
+                        { label: 'Margen de Stacking', value: '3 horas', desc: 'Protección contra el apilamiento de dosis.' },
+                        { label: 'Alerta Crisis Hiper', value: '250 mg/dL', desc: 'Gatillo para escalamiento hospitalario.' },
+                      ].map(s => (
+                        <div key={s.label} className="flex flex-col gap-1">
+                           <div className="flex justify-between items-center">
+                              <span className="text-sm font-bold text-slate-700">{s.label}</span>
+                              <span className="text-sm font-black text-blue-600">{s.value}</span>
+                           </div>
+                           <p className="text-[10px] text-slate-400 font-medium">{s.desc}</p>
+                        </div>
+                      ))}
+                   </div>
+
+                   <div className="bg-slate-900 text-white rounded-3xl p-8 space-y-6 relative overflow-hidden shadow-xl shadow-slate-200">
+                      <div className="absolute -right-10 -bottom-10 opacity-10"><ShieldCheck size={200}/></div>
+                      <h4 className="font-black text-blue-400 uppercase text-xs tracking-widest relative z-10">Estado del SaMD</h4>
+                      <div className="space-y-4 relative z-10">
+                         <div className="flex items-center gap-3">
+                            <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_#10b981]" />
+                            <p className="text-sm font-bold">Motor sidecar v2.4 Activo</p>
+                         </div>
+                         <div className="flex items-center gap-3">
+                            <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_#10b981]" />
+                            <p className="text-sm font-bold">Base GPC-COL-2023 Sincronizada</p>
+                         </div>
+                         <div className="flex items-center gap-3">
+                            <div className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_10px_#3b82f6]" />
+                            <p className="text-sm font-bold">Protocolo Rural Edges Activo</p>
+                         </div>
+                      </div>
+                      <button className="w-full mt-10 py-4 bg-slate-800 border border-slate-700 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-700 transition-all">
+                        Certificar Logs de Seguridad
+                      </button>
+                   </div>
+                </div>
+             </div>
+           )}
+
+        </div>
       </main>
+
+      {/* Navigation - Mobile Bottom Bar */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 h-20 bg-white border-t border-slate-200 flex items-center justify-around px-2 z-50">
+        {navItems.map((item) => (
+          <button
+            key={item.id}
+            onClick={() => setCurrentView(item.id as any)}
+            className={`flex flex-col items-center gap-1 p-2 transition-all ${
+              currentView === item.id ? 'text-blue-600' : 'text-slate-400'
+            }`}
+          >
+            <item.icon size={24} strokeWidth={currentView === item.id ? 3 : 2} />
+            <span className="text-[10px] font-black uppercase tracking-tighter">{item.label}</span>
+          </button>
+        ))}
+      </nav>
     </div>
   );
 }
