@@ -158,6 +158,12 @@ export default function SofIAApp() {
             >
               INGRESAR AL SISTEMA
             </button>
+            <button 
+              onClick={() => { setLoginId('DR-JOHANA-2026'); setLoginPass('password'); }}
+              className="w-full text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-2 hover:text-blue-500 transition-colors"
+            >
+              Usar Credenciales de Prueba
+            </button>
           </div>
           <p className="mt-8 text-[10px] text-center text-slate-400 font-medium">
             SISTEMA CERTIFICADO SaMD CLASS IIa <br/> © 2026 PROYECTO SOF-IA
