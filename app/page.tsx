@@ -28,7 +28,8 @@ import {
   Volume2,
   VolumeX,
   LogOut,
-  CheckCircle2
+  CheckCircle2,
+  Activity
 } from 'lucide-react';
 import { MOCK_PATIENTS as INITIAL_MOCK_PATIENTS, MOCK_NOTIFICATIONS } from '@/lib/mockData';
 import { validateRecommendation } from '@/lib/sidecarLogic';
@@ -251,13 +252,13 @@ export default function SofIAApp() {
         <div className="max-w-md w-full relative z-10">
           <div className="bg-white rounded-[40px] p-8 sm:p-12 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)] border border-white/10">
             <div className="flex justify-center mb-8">
-              <div className="bg-blue-600 p-5 rounded-3xl shadow-xl shadow-blue-500/20">
-                <ShieldCheck className="text-white" size={48} />
-              </div>
+               <div className="bg-blue-600 p-5 rounded-3xl shadow-xl shadow-blue-500/20 animate-pulse">
+                  <Activity className="text-white" size={48} />
+               </div>
             </div>
-
+            
             <div className="text-center mb-10">
-              <h1 className="text-4xl font-black text-slate-900 tracking-tight mb-2">Sof-IA Portal</h1>
+              <h1 className="text-4xl font-black text-slate-900 tracking-tight mb-2">Sof-IA V3.0</h1>
               <div className="flex items-center justify-center gap-2">
                 <span className="h-[1px] w-8 bg-slate-200" />
                 <p className="text-slate-500 text-[10px] uppercase font-black tracking-[0.3em]">Acceso Bio-Seguro</p>
