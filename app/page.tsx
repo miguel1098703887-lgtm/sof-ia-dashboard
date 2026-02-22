@@ -124,45 +124,45 @@ export default function SofIAApp() {
           <h1 className="text-3xl font-black text-center text-slate-900 tracking-tighter mb-2">Sof-IA Portal</h1>
           <p className="text-center text-slate-500 text-sm mb-8 uppercase font-bold tracking-widest">Acceso Clínico Bio-Seguro</p>
           
-          <div className="space-y-6">
-            <div className="bg-slate-100 p-2 rounded-2xl border-2 border-slate-200">
-              <label className="text-[12px] font-black text-slate-900 uppercase ml-3 block mb-1">Identificación Médica</label>
+          <div className="space-y-8 mt-10">
+            <div className="bg-white p-6 rounded-3xl border-8 border-black shadow-[10px_10px_0px_#000000]">
+              <label className="text-[14px] font-black text-black uppercase block mb-3">ESCRIBE TU USUARIO AQUÍ:</label>
               <input 
                 type="text" 
-                placeholder="Escribe aquí..." 
-                className="w-full p-5 bg-white border-4 border-slate-900 rounded-xl outline-none focus:ring-4 focus:ring-blue-500 transition-all font-black text-[24px] text-black block placeholder:text-slate-400" 
-                style={{ color: '#000000', backgroundColor: '#FFFFFF', opacity: 1, WebkitTextFillColor: '#000000' }}
+                placeholder="EJ: DR-JOHANA-2026" 
+                className="w-full p-6 bg-slate-200 border-4 border-black rounded-xl font-black text-[28px] text-black block placeholder:text-slate-500" 
+                style={{ color: 'black', fontWeight: '900', opacity: '1' }}
                 value={loginId}
                 onChange={(e) => setLoginId(e.target.value)}
               />
             </div>
-            <div className="bg-slate-100 p-2 rounded-2xl border-2 border-slate-200">
-              <label className="text-[12px] font-black text-slate-900 uppercase ml-3 block mb-1">Contraseña</label>
+            <div className="bg-white p-6 rounded-3xl border-8 border-black shadow-[10px_10px_0px_#000000]">
+              <label className="text-[14px] font-black text-black uppercase block mb-3">ESCRIBE TU CONTRASEÑA AQUÍ:</label>
               <input 
                 type="password" 
                 placeholder="••••••••" 
-                className="w-full p-5 bg-white border-4 border-slate-900 rounded-xl outline-none focus:ring-4 focus:ring-blue-500 transition-all font-black text-[24px] text-black block placeholder:text-slate-400" 
-                style={{ color: '#000000', backgroundColor: '#FFFFFF', opacity: 1, WebkitTextFillColor: '#000000' }}
+                className="w-full p-6 bg-slate-200 border-4 border-black rounded-xl font-black text-[28px] text-black block placeholder:text-slate-500" 
+                style={{ color: 'black', fontWeight: '900', opacity: '1' }}
                 value={loginPass}
                 onChange={(e) => setLoginPass(e.target.value)}
               />
             </div>
-            <div className="pt-2">
+            <div className="pt-4">
               <button 
                 onClick={() => {
                   if (loginId === 'DR-JOHANA-2026' && loginPass === 'password') {
                     setIsLoggedIn(true);
                   } else {
-                    alert('ERROR: ID o PASS incorrectos.\n\nPrueba con el botón de abajo si tienes dudas.');
+                    alert('ERROR DE ACCESO.\n\nUSUARIO: DR-JOHANA-2026\nPASS: password');
                   }
                 }}
-                className="w-full py-6 bg-blue-600 text-white rounded-2xl font-black text-xl hover:bg-blue-700 transition-all shadow-2xl active:scale-95 border-b-8 border-blue-900"
+                className="w-full py-8 bg-blue-600 text-white rounded-3xl font-black text-2xl hover:bg-blue-700 transition-all border-b-[12px] border-blue-900 active:border-b-0 active:translate-y-2 shadow-2xl"
               >
                 INGRESAR AL SISTEMA
               </button>
               <button 
                 onClick={() => { setLoginId('DR-JOHANA-2026'); setLoginPass('password'); }}
-                className="w-full py-4 bg-emerald-500 text-black font-black rounded-xl uppercase tracking-tighter mt-8 shadow-lg active:bg-emerald-600"
+                className="w-full py-6 bg-emerald-500 text-black font-black text-xl rounded-2xl uppercase mt-10 shadow-xl border-4 border-black active:bg-emerald-600"
               >
                 ENTRAR SIN ESCRIBIR (CLIC AQUÍ)
               </button>
