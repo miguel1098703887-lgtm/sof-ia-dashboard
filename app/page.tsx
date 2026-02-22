@@ -125,24 +125,24 @@ export default function SofIAApp() {
           <p className="text-center text-slate-500 text-sm mb-8 uppercase font-bold tracking-widest">Acceso Clínico Bio-Seguro</p>
           
           <div className="space-y-6">
-            <div className="bg-slate-900 p-1 rounded-2xl">
-              <label className="text-[12px] font-black text-white uppercase ml-3 block mb-1">Identificación Médica</label>
+            <div className="bg-slate-100 p-2 rounded-2xl border-2 border-slate-200">
+              <label className="text-[12px] font-black text-slate-900 uppercase ml-3 block mb-1">Identificación Médica</label>
               <input 
                 type="text" 
                 placeholder="Escribe aquí..." 
-                className="w-full p-5 bg-black border-4 border-blue-500 rounded-xl outline-none focus:ring-4 focus:ring-white transition-all font-black text-[24px] text-white block placeholder:text-slate-700" 
-                style={{ color: '#FFFFFF', backgroundColor: '#000000', caretColor: '#FFFFFF', opacity: 1 }}
+                className="w-full p-5 bg-white border-4 border-slate-900 rounded-xl outline-none focus:ring-4 focus:ring-blue-500 transition-all font-black text-[24px] text-black block placeholder:text-slate-400" 
+                style={{ color: '#000000', backgroundColor: '#FFFFFF', opacity: 1, WebkitTextFillColor: '#000000' }}
                 value={loginId}
                 onChange={(e) => setLoginId(e.target.value)}
               />
             </div>
-            <div className="bg-slate-900 p-1 rounded-2xl">
-              <label className="text-[12px] font-black text-white uppercase ml-3 block mb-1">Contraseña</label>
+            <div className="bg-slate-100 p-2 rounded-2xl border-2 border-slate-200">
+              <label className="text-[12px] font-black text-slate-900 uppercase ml-3 block mb-1">Contraseña</label>
               <input 
                 type="password" 
                 placeholder="••••••••" 
-                className="w-full p-5 bg-black border-4 border-blue-500 rounded-xl outline-none focus:ring-4 focus:ring-white transition-all font-black text-[24px] text-white block placeholder:text-slate-700" 
-                style={{ color: '#FFFFFF', backgroundColor: '#000000', caretColor: '#FFFFFF', opacity: 1 }}
+                className="w-full p-5 bg-white border-4 border-slate-900 rounded-xl outline-none focus:ring-4 focus:ring-blue-500 transition-all font-black text-[24px] text-black block placeholder:text-slate-400" 
+                style={{ color: '#000000', backgroundColor: '#FFFFFF', opacity: 1, WebkitTextFillColor: '#000000' }}
                 value={loginPass}
                 onChange={(e) => setLoginPass(e.target.value)}
               />
