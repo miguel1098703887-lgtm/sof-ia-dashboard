@@ -42,6 +42,10 @@ export default function SofIAApp() {
   const [patients, setPatients] = useState(INITIAL_MOCK_PATIENTS);
   const [history, setHistory] = useState<Record<string, { time: string, glucose: number }[]>>({});
   
+  // Login State
+  const [loginId, setLoginId] = useState('');
+  const [loginPass, setLoginPass] = useState('');
+  
   // Simulation for Audit logic
   const [llmDose, setLlmDose] = useState(2);
   const [lastDoseHours, setLastDoseHours] = useState(1.5);
@@ -120,45 +124,41 @@ export default function SofIAApp() {
           <h1 className="text-3xl font-black text-center text-slate-900 tracking-tighter mb-2">Sof-IA Portal</h1>
           <p className="text-center text-slate-500 text-sm mb-8 uppercase font-bold tracking-widest">Acceso Clínico Bio-Seguro</p>
           
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              const target = e.target as any;
-              const userId = target.userId.value;
-              const password = target.password.value;
-              
-              if (userId === 'DR-JOHANA-2026' && password === 'password') {
-                setIsLoggedIn(true);
-              } else {
-                alert('Credenciales incorrectas. Por favor, verifique su ID y contraseña.');
-              }
-            }} className="space-y-4">
-              <div>
-                <label className="text-[10px] font-bold text-slate-400 uppercase ml-1">Identificación Médica</label>
-                <input 
-                  name="userId"
-                  type="text" 
-                  placeholder="ID Registro" 
-                  className="w-full mt-1 p-4 bg-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium text-slate-900 relative z-[100]" 
-                  required
-                />
-              </div>
-              <div>
-                <label className="text-[10px] font-bold text-slate-400 uppercase ml-1">Contraseña</label>
-                <input 
-                  name="password"
-                  type="password" 
-                  placeholder="••••••••" 
-                  className="w-full mt-1 p-4 bg-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium text-slate-900 relative z-[100]" 
-                  required
-                />
-              </div>
-              <button 
-                type="submit"
-                className="w-full py-4 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 relative z-[100]"
-              >
-                INGRESAR AL SISTEMA
-              </button>
-            </form>
+          <div className="space-y-4">
+            <div>
+              <label className="text-[10px] font-bold text-slate-400 uppercase ml-1">Identificación Médica</label>
+              <input 
+                type="text" 
+                placeholder="ID Registro" 
+                className="w-full mt-1 p-4 bg-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium text-slate-900 block" 
+                value={loginId}
+                onChange={(e) => setLoginId(e.target.value)}
+                autoFocus
+              />
+            </div>
+            <div>
+              <label className="text-[10px] font-bold text-slate-400 uppercase ml-1">Contraseña</label>
+              <input 
+                type="password" 
+                placeholder="••••••••" 
+                className="w-full mt-1 p-4 bg-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium text-slate-900 block" 
+                value={loginPass}
+                onChange={(e) => setLoginPass(e.target.value)}
+              />
+            </div>
+            <button 
+              onClick={() => {
+                if (loginId === 'DR-JOHANA-2026' && loginPass === 'password') {
+                  setIsLoggedIn(true);
+                } else {
+                  alert('Credenciales incorrectas. Verifique ID y Contraseña.');
+                }
+              }}
+              className="w-full py-4 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-200"
+            >
+              INGRESAR AL SISTEMA
+            </button>
+          </div>
           <p className="mt-8 text-[10px] text-center text-slate-400 font-medium">
             SISTEMA CERTIFICADO SaMD CLASS IIa <br/> © 2026 PROYECTO SOF-IA
           </p>
