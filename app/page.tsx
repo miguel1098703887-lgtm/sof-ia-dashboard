@@ -140,14 +140,14 @@ export default function SofIAApp() {
             
             <div className="space-y-6">
               <div className="group">
-                <label className="text-[11px] font-black text-slate-400 uppercase ml-1 block mb-2 transition-colors group-focus-within:text-blue-600">ID Facultativo</label>
+                <label className="text-[11px] font-black text-black uppercase ml-1 block mb-2 transition-colors group-focus-within:text-blue-600">ID Facultativo</label>
                 <div className="relative">
-                  <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500" size={20} />
+                  <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-900 group-focus-within:text-blue-500" size={20} />
                   <input 
                     type="text" 
                     placeholder="Ingrese su registro" 
-                    className="w-full pl-12 pr-4 py-5 bg-white border-2 border-slate-200 rounded-2xl outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-black text-[20px] text-black block placeholder:text-slate-300" 
-                    style={{ color: '#000000', WebkitTextFillColor: '#000000', opacity: 1 }}
+                    className="w-full pl-12 pr-4 py-5 bg-white border-4 border-black rounded-2xl outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-600 transition-all font-black text-[22px] block placeholder:text-slate-300" 
+                    style={{ color: 'black', WebkitTextFillColor: 'black', opacity: 1, appearance: 'none', caretColor: 'black' }}
                     value={loginId}
                     onChange={(e) => setLoginId(e.target.value)}
                   />
@@ -155,14 +155,14 @@ export default function SofIAApp() {
               </div>
 
               <div className="group">
-                <label className="text-[11px] font-black text-slate-900 uppercase ml-1 block mb-2 transition-colors group-focus-within:text-blue-600">Contraseña Maestra</label>
+                <label className="text-[11px] font-black text-black uppercase ml-1 block mb-2 transition-colors group-focus-within:text-blue-600">Contraseña Maestra</label>
                 <div className="relative">
-                  <ShieldCheck className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500" size={20} />
+                  <ShieldCheck className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-900 group-focus-within:text-blue-500" size={20} />
                   <input 
                     type="password" 
                     placeholder="••••••••" 
-                    className="w-full pl-12 pr-4 py-5 bg-white border-2 border-slate-200 rounded-2xl outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-black text-[20px] text-black block placeholder:text-slate-300" 
-                    style={{ color: '#000000', WebkitTextFillColor: '#000000', opacity: 1 }}
+                    className="w-full pl-12 pr-4 py-5 bg-white border-4 border-black rounded-2xl outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-600 transition-all font-black text-[22px] block placeholder:text-slate-300" 
+                    style={{ color: 'black', WebkitTextFillColor: 'black', opacity: 1, appearance: 'none', caretColor: 'black' }}
                     value={loginPass}
                     onChange={(e) => setLoginPass(e.target.value)}
                   />
