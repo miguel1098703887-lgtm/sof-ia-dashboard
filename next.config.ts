@@ -6,7 +6,6 @@ const nextConfig: NextConfig = {
     unoptimized: true,
   },
   basePath: '/sof-ia-dashboard',
-  assetPrefix: '/sof-ia-dashboard',
 };
 
 export default nextConfig;
