@@ -25,7 +25,8 @@ import {
   ChevronRight,
   LogOut,
   Plus,
-  AlertCircle
+  AlertCircle,
+  CheckCircle2
 } from 'lucide-react';
 import { MOCK_PATIENTS as INITIAL_MOCK_PATIENTS, MOCK_NOTIFICATIONS } from '@/lib/mockData';
 import { validateRecommendation } from '@/lib/sidecarLogic';
@@ -50,6 +51,8 @@ export default function SofIAApp() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [loginError, setLoginError] = useState('');
+  const [notifications, setNotifications] = useState(MOCK_NOTIFICATIONS);
+  const [showMonitoringReport, setShowMonitoringReport] = useState(false);
 
   // Login State
   const [loginId, setLoginId] = useState('');
@@ -800,7 +803,7 @@ export default function SofIAApp() {
                     </div>
                   </div>
                   <button
-                    onClick={() => showToast('Certificación de Logs generada exitosamente. Firma digital aplicada.')}
+                    onClick={() => setShowMonitoringReport(true)}
                     className="w-full mt-10 py-4 bg-slate-800 border border-slate-700 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-700 transition-all active:scale-[0.98]">
                     Certificar Logs de Seguridad
                   </button>
@@ -867,6 +870,93 @@ export default function SofIAApp() {
         <div className="fixed bottom-24 right-4 lg:bottom-10 lg:right-10 bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-2xl z-[100] font-bold text-sm flex items-center gap-3 animate-in slide-in-from-bottom-5 fade-in duration-300">
           <CheckCircle2 size={18} className="text-emerald-400" />
           {toastMessage}
+        </div>
+      )}
+
+      {showMonitoringReport && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[110] flex items-center justify-center p-4">
+          <div className="bg-white rounded-[40px] max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl border border-white/20 animate-in zoom-in-95 fade-in duration-300 flex flex-col">
+            <div className="p-8 bg-slate-900 text-white flex justify-between items-center">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <ShieldCheck className="text-blue-400" size={20} />
+                  <h3 className="text-xl font-black tracking-tight">Reporte de Monitoría Clínica</h3>
+                </div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Generado: {new Date().toLocaleString('es-CO')}</p>
+              </div>
+              <button onClick={() => setShowMonitoringReport(false)} className="p-3 bg-white/10 rounded-full hover:bg-white/20 transition-colors"><X size={20} /></button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto p-8 space-y-8">
+              {/* Summary Stats */}
+              <div className="grid grid-cols-3 gap-4">
+                <div className="bg-slate-50 p-5 rounded-3xl border border-slate-100">
+                   <p className="text-[10px] font-black text-slate-400 uppercase mb-1">Total Pacientes</p>
+                   <p className="text-2xl font-black text-slate-900">{patients.length}</p>
+                </div>
+                <div className="bg-red-50 p-5 rounded-3xl border border-red-100">
+                   <p className="text-[10px] font-black text-red-400 uppercase mb-1">En Estado Crítico</p>
+                   <p className="text-2xl font-black text-red-600">{patients.filter(p => p.status === 'critical').length}</p>
+                </div>
+                <div className="bg-emerald-50 p-5 rounded-3xl border border-emerald-100">
+                   <p className="text-[10px] font-black text-emerald-400 uppercase mb-1">Sidecar Uptime</p>
+                   <p className="text-2xl font-black text-emerald-600">100%</p>
+                </div>
+              </div>
+
+              {/* Critical List */}
+              <div className="space-y-4">
+                <h4 className="text-xs font-black text-slate-900 uppercase tracking-widest flex items-center gap-2">
+                   <AlertCircle size={16} className="text-red-500" /> Detalle de Pacientes Críticos
+                </h4>
+                <div className="space-y-2">
+                  {patients.filter(p => p.status === 'critical').map(p => (
+                    <div key={p.id} className="p-4 bg-white border border-slate-200 rounded-2xl flex items-center justify-between">
+                       <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center text-red-600 font-black">{p.name.charAt(0)}</div>
+                          <div>
+                             <p className="text-sm font-black text-slate-900">{p.name}</p>
+                             <p className="text-[10px] font-bold text-slate-400 uppercase">{p.location}</p>
+                          </div>
+                       </div>
+                       <div className="text-right">
+                          <p className="text-lg font-black text-red-600">{p.glucose} mg/dL</p>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase">Tendencia: {p.trend === 'up' ? 'Alza' : 'Baja'}</p>
+                       </div>
+                    </div>
+                  ))}
+                  {patients.filter(p => p.status === 'critical').length === 0 && (
+                    <p className="text-sm text-slate-400 font-bold text-center py-4 bg-slate-50 rounded-2xl italic border border-dashed border-slate-200">No hay pacientes críticos detectados en este ciclo.</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Security Audit */}
+              <div className="p-6 bg-blue-600 rounded-[32px] text-white">
+                 <div className="flex items-center gap-3 mb-4">
+                    <ShieldCheck size={24} className="text-blue-200" />
+                    <h4 className="font-black tracking-tight">Validación Biosegura SaMD</h4>
+                 </div>
+                 <p className="text-xs font-medium text-blue-100 leading-relaxed opacity-90">
+                    Todas las interacciones de este ciclo han sido validadas contra las <b>Guías de Práctica Clínica (GPC) de Colombia</b>. 
+                    El motor Sidecar v2.4 no ha detectado desviaciones algorítmicas en las recomendaciones de IA.
+                 </p>
+                 <div className="mt-6 pt-6 border-t border-blue-500 flex justify-between items-center">
+                    <div className="text-[10px] font-black uppercase tracking-widest text-blue-200">ID de Auditoría: SOF-IA-2026-X88</div>
+                    <div className="text-[10px] font-black uppercase tracking-widest text-blue-200">Certificado por: Dra. Johana</div>
+                 </div>
+              </div>
+            </div>
+
+            <div className="p-8 bg-slate-50 border-t border-slate-100 flex gap-4">
+               <button onClick={() => showToast('Reporte exportado como PDF bioseguro.')} className="flex-1 py-4 bg-slate-900 text-white rounded-2xl font-black text-sm hover:bg-black transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2">
+                  Exportar PDF
+               </button>
+               <button onClick={() => { setShowMonitoringReport(false); showToast('Reporte enviado al sistema central de salud.'); }} className="flex-1 py-4 bg-blue-600 text-white rounded-2xl font-black text-sm hover:bg-blue-700 transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2">
+                  Enviar a GPC
+               </button>
+            </div>
+          </div>
         </div>
       )}
 
