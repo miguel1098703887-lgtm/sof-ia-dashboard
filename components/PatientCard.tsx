@@ -3,12 +3,13 @@ import { Patient } from '@/lib/types';
 import { TrendingUp, TrendingDown, Minus, MapPin, ChevronRight } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { AreaChart, Area, ResponsiveContainer, YAxis } from 'recharts';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export default function PatientCard({ patient, isSelected }: { patient: Patient, isSelected?: boolean }) {
+export default function PatientCard({ patient, isSelected, history = [] }: { patient: Patient, isSelected?: boolean, history?: { time: string, glucose: number }[] }) {
   const getStatusColor = (status: Patient['status']) => {
     switch (status) {
       case 'critical': return 'bg-red-500 text-white';
@@ -47,7 +48,15 @@ export default function PatientCard({ patient, isSelected }: { patient: Patient,
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 mt-2">
+        <div className="flex-1 h-8 bg-slate-50/50 rounded-lg overflow-hidden relative">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={history}>
+              <YAxis domain={['auto', 'auto']} hide />
+              <Area type="monotone" dataKey="glucose" stroke={patient.status === 'critical' ? '#ef4444' : patient.status === 'warning' ? '#fbbf24' : '#2563eb'} fillOpacity={0.1} fill={patient.status === 'critical' ? '#ef4444' : patient.status === 'warning' ? '#fbbf24' : '#2563eb'} strokeWidth={2} />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
         <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
           <div className="h-full bg-blue-600 rounded-full" style={{ width: `${patient.tir}%` }} />
         </div>
