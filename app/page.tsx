@@ -75,71 +75,89 @@ export default function SofIAApp() {
   useEffect(() => {
     if (!isLoggedIn) return;
 
-    const interval = setInterval(() => {
-      setPatients(prevPatients => prevPatients.map(patient => {
-        // Random walk for glucose
-        let change = Math.floor(Math.random() * 7) - 3; // -3 to +3
-
-        // Add tendency logic
-        if (patient.trend === 'up') change += 1;
-        if (patient.trend === 'down') change -= 1;
-
-        let newGlucose = patient.glucose + change;
-
-        // Bounds
-        if (newGlucose < 40) newGlucose = 40;
-        if (newGlucose > 450) newGlucose = 450;
-
-        // Update status based on new glucose
-        let newStatus = patient.status;
-        if (newGlucose < 70 || newGlucose > 250) {
-          newStatus = 'critical';
-        } else if (newGlucose < 90 || newGlucose > 180) {
-          newStatus = 'warning';
-        } else {
-          newStatus = 'stable';
-        }
-
-        // Update trend occasionally
-        let newTrend = patient.trend;
-        if (Math.random() > 0.9) {
-          const trends: ('up' | 'down' | 'stable')[] = ['up', 'down', 'stable'];
-          newTrend = trends[Math.floor(Math.random() * trends.length)];
-        }
-
-        // Update history
-        const now = new Date();
-        const timeStr = `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
-
-        setHistory(prev => {
-          let patientHistory = prev[patient.id];
-          if (!patientHistory) {
-            // Generate mock backward curve so the chart is full instantly
-            patientHistory = [];
-            let curveG = patient.glucose;
-            for (let i = 19; i >= 1; i--) {
-              curveG = Math.max(40, Math.min(450, curveG - (Math.floor(Math.random() * 7) - 3)));
-              const t = new Date(now.getTime() - i * 5000);
-              const tStr = `${t.getHours()}:${t.getMinutes().toString().padStart(2, '0')}:${t.getSeconds().toString().padStart(2, '0')}`;
-              patientHistory.push({ time: tStr, glucose: curveG });
-            }
+    // Initialize history for existing patients so charts are full instantly
+    setHistory(prev => {
+      const newHistory = { ...prev };
+      let changed = false;
+      const now = new Date();
+      patients.forEach((patient: typeof patients[0]) => {
+        if (!newHistory[patient.id]) {
+          changed = true;
+          const patientHistory = [];
+          let curveG = patient.glucose;
+          for (let i = 19; i >= 0; i--) {
+            curveG = Math.max(40, Math.min(450, curveG - (Math.floor(Math.random() * 7) - 3)));
+            const t = new Date(now.getTime() - i * 5000);
+            const tStr = `${t.getHours()}:${t.getMinutes().toString().padStart(2, '0')}:${t.getSeconds().toString().padStart(2, '0')}`;
+            patientHistory.push({ time: tStr, glucose: curveG });
           }
-          const newHistory = [...patientHistory, { time: timeStr, glucose: newGlucose }].slice(-20); // Keep last 20 points
-          return { ...prev, [patient.id]: newHistory };
+          newHistory[patient.id] = patientHistory;
+        }
+      });
+      return changed ? newHistory : prev;
+    });
+
+    const intervalId = setInterval(() => {
+      const now = new Date();
+      const timeStr = `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+
+      setPatients(prevPatients => {
+        const updatedPatients = prevPatients.map(patient => {
+          // Random walk for glucose
+          let change = Math.floor(Math.random() * 7) - 3; // -3 to +3
+
+          // Add tendency logic
+          if (patient.trend === 'up') change += 1;
+          if (patient.trend === 'down') change -= 1;
+
+          let newGlucose = patient.glucose + change;
+
+          // Bounds
+          if (newGlucose < 40) newGlucose = 40;
+          if (newGlucose > 450) newGlucose = 450;
+
+          // Update status based on new glucose
+          let newStatus = patient.status;
+          if (newGlucose < 70 || newGlucose > 250) {
+            newStatus = 'critical';
+          } else if (newGlucose < 90 || newGlucose > 180) {
+            newStatus = 'warning';
+          } else {
+            newStatus = 'stable';
+          }
+
+          // Update trend occasionally
+          let newTrend = patient.trend;
+          if (Math.random() > 0.9) {
+            const trends: ('up' | 'down' | 'stable')[] = ['up', 'down', 'stable'];
+            newTrend = trends[Math.floor(Math.random() * trends.length)];
+          }
+
+          return {
+            ...patient,
+            glucose: newGlucose,
+            status: newStatus,
+            trend: newTrend,
+            lastUpdate: 'Ahora'
+          };
         });
 
-        return {
-          ...patient,
-          glucose: newGlucose,
-          status: newStatus,
-          trend: newTrend,
-          lastUpdate: 'Ahora'
-        };
-      }));
-    }, 5000); // Update every 5 seconds
+        // Sync history after calculating new patients
+        setHistory((prevHistory: Record<string, { time: string, glucose: number }[]>) => {
+          const nextHistory = { ...prevHistory };
+          updatedPatients.forEach((patient: typeof patients[0]) => {
+            const h = nextHistory[patient.id] || [];
+            nextHistory[patient.id] = [...h, { time: timeStr, glucose: patient.glucose }].slice(-20);
+          });
+          return nextHistory;
+        });
 
-    return () => clearInterval(interval);
-  }, [isLoggedIn]);
+        return updatedPatients;
+      });
+    }, 5000); // Mueve cada 5 segundos en vida real
+
+    return () => clearInterval(intervalId);
+  }, [isLoggedIn]); // Solo ejecutamos si isLoggedIn cambia
 
   // Authentication Guard (Simulated)
   if (!isLoggedIn) {
