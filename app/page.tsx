@@ -176,8 +176,7 @@ export default function SofIAApp() {
                   <input
                     type="text"
                     placeholder="Ingrese su registro"
-                    className="w-full pl-12 pr-4 py-5 bg-white border-4 border-black rounded-2xl outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-600 transition-all font-black text-[22px] block placeholder:text-slate-300"
-                    style={{ color: 'black', WebkitTextFillColor: 'black', opacity: 1, appearance: 'none', caretColor: 'black' }}
+                    className="w-full pl-12 pr-4 py-5 bg-white border-4 border-black rounded-2xl outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-600 transition-all font-black text-[22px] text-slate-900 block placeholder:text-slate-400"
                     value={loginId}
                     onChange={(e) => setLoginId(e.target.value)}
                   />
@@ -191,8 +190,7 @@ export default function SofIAApp() {
                   <input
                     type="password"
                     placeholder="••••••••"
-                    className="w-full pl-12 pr-4 py-5 bg-white border-4 border-black rounded-2xl outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-600 transition-all font-black text-[22px] block placeholder:text-slate-300"
-                    style={{ color: 'black', WebkitTextFillColor: 'black', opacity: 1, appearance: 'none', caretColor: 'black' }}
+                    className="w-full pl-12 pr-4 py-5 bg-white border-4 border-black rounded-2xl outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-600 transition-all font-black text-[22px] text-slate-900 block placeholder:text-slate-400"
                     value={loginPass}
                     onChange={(e) => setLoginPass(e.target.value)}
                   />
