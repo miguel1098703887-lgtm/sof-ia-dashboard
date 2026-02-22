@@ -122,9 +122,9 @@ export default function SofIAApp() {
           
             <form onSubmit={(e) => {
               e.preventDefault();
-              const formData = new FormData(e.currentTarget);
-              const userId = formData.get('userId');
-              const password = formData.get('password');
+              const target = e.target as any;
+              const userId = target.userId.value;
+              const password = target.password.value;
               
               if (userId === 'DR-JOHANA-2026' && password === 'password') {
                 setIsLoggedIn(true);
@@ -138,8 +138,7 @@ export default function SofIAApp() {
                   name="userId"
                   type="text" 
                   placeholder="ID Registro" 
-                  className="w-full mt-1 p-4 bg-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium text-slate-900" 
-                  autoComplete="off"
+                  className="w-full mt-1 p-4 bg-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium text-slate-900 relative z-[100]" 
                   required
                 />
               </div>
@@ -149,14 +148,13 @@ export default function SofIAApp() {
                   name="password"
                   type="password" 
                   placeholder="••••••••" 
-                  className="w-full mt-1 p-4 bg-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium text-slate-900" 
-                  autoComplete="off"
+                  className="w-full mt-1 p-4 bg-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium text-slate-900 relative z-[100]" 
                   required
                 />
               </div>
               <button 
                 type="submit"
-                className="w-full py-4 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-200"
+                className="w-full py-4 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 relative z-[100]"
               >
                 INGRESAR AL SISTEMA
               </button>
