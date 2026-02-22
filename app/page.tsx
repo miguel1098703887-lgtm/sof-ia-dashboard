@@ -2,6 +2,17 @@
 
 import React, { useState, useEffect } from 'react';
 import { 
+  LineChart, 
+  Line, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer,
+  AreaChart,
+  Area
+} from 'recharts';
+import { 
   Home, 
   Users, 
   ShieldCheck, 
@@ -29,6 +40,7 @@ export default function SofIAApp() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [patients, setPatients] = useState(INITIAL_MOCK_PATIENTS);
+  const [history, setHistory] = useState<Record<string, { time: string, glucose: number }[]>>({});
   
   // Simulation for Audit logic
   const [llmDose, setLlmDose] = useState(2);
@@ -71,6 +83,16 @@ export default function SofIAApp() {
           const trends: ('up' | 'down' | 'stable')[] = ['up', 'down', 'stable'];
           newTrend = trends[Math.floor(Math.random() * trends.length)];
         }
+
+        // Update history
+        const now = new Date();
+        const timeStr = `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+        
+        setHistory(prev => {
+          const patientHistory = prev[patient.id] || [];
+          const newHistory = [...patientHistory, { time: timeStr, glucose: newGlucose }].slice(-20); // Keep last 20 points
+          return { ...prev, [patient.id]: newHistory };
+        });
 
         return {
           ...patient,
@@ -376,6 +398,62 @@ export default function SofIAApp() {
                                 <p className="text-xs font-medium text-blue-100 opacity-80 leading-relaxed">
                                    El sistema de triaje autónomo está validando los parámetros del gemelo digital contra las GPC de Colombia.
                                 </p>
+                             </div>
+                          </div>
+
+                          {/* Glucose History Chart */}
+                          <div className="bg-white border border-slate-100 rounded-3xl p-6 mb-10 shadow-sm">
+                             <div className="flex justify-between items-center mb-6">
+                                <h4 className="font-black text-slate-900 uppercase text-xs tracking-widest flex items-center gap-2">
+                                   <AlertCircle size={16} className="text-blue-600" /> Curva de Glucosa (Tiempo Real)
+                                </h4>
+                                <div className="flex gap-2">
+                                   <div className="flex items-center gap-1">
+                                      <div className="w-3 h-3 bg-blue-600 rounded-full"></div>
+                                      <span className="text-[10px] font-bold text-slate-400">mg/dL</span>
+                                   </div>
+                                </div>
+                             </div>
+                             <div className="h-64 w-full">
+                                <ResponsiveContainer width="100%" height="100%">
+                                   <AreaChart data={history[selectedPatient.id] || []}>
+                                      <defs>
+                                         <linearGradient id="colorGlucose" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#2563eb" stopOpacity={0.3}/>
+                                            <stop offset="95%" stopColor="#2563eb" stopOpacity={0}/>
+                                         </linearGradient>
+                                      </defs>
+                                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                      <XAxis 
+                                         dataKey="time" 
+                                         hide={true}
+                                      />
+                                      <YAxis 
+                                         domain={['auto', 'auto']} 
+                                         axisLine={false}
+                                         tickLine={false}
+                                         tick={{ fontSize: 10, fontWeight: 'bold', fill: '#94a3b8' }}
+                                      />
+                                      <Tooltip 
+                                         contentStyle={{ 
+                                            borderRadius: '16px', 
+                                            border: 'none', 
+                                            boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
+                                            fontSize: '12px',
+                                            fontWeight: 'bold'
+                                         }}
+                                      />
+                                      <Area 
+                                         type="monotone" 
+                                         dataKey="glucose" 
+                                         stroke="#2563eb" 
+                                         strokeWidth={4}
+                                         fillOpacity={1} 
+                                         fill="url(#colorGlucose)" 
+                                         animationDuration={300}
+                                      />
+                                   </AreaChart>
+                                </ResponsiveContainer>
                              </div>
                           </div>
 
