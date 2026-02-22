@@ -101,22 +101,17 @@ export default function SofIAApp() {
       const now = new Date();
       const timeStr = `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
 
+      // Create deterministic updates for this tick outside the setters
       setPatients(prevPatients => {
-        const updatedPatients = prevPatients.map(patient => {
-          // Random walk for glucose
-          let change = Math.floor(Math.random() * 7) - 3; // -3 to +3
-
-          // Add tendency logic
+        const nextPatients = prevPatients.map(patient => {
+          let change = Math.floor(Math.random() * 7) - 3;
           if (patient.trend === 'up') change += 1;
           if (patient.trend === 'down') change -= 1;
 
           let newGlucose = patient.glucose + change;
-
-          // Bounds
           if (newGlucose < 40) newGlucose = 40;
           if (newGlucose > 450) newGlucose = 450;
 
-          // Update status based on new glucose
           let newStatus = patient.status;
           if (newGlucose < 70 || newGlucose > 250) {
             newStatus = 'critical';
@@ -126,35 +121,31 @@ export default function SofIAApp() {
             newStatus = 'stable';
           }
 
-          // Update trend occasionally
           let newTrend = patient.trend;
           if (Math.random() > 0.9) {
             const trends: ('up' | 'down' | 'stable')[] = ['up', 'down', 'stable'];
             newTrend = trends[Math.floor(Math.random() * trends.length)];
           }
 
-          return {
-            ...patient,
-            glucose: newGlucose,
-            status: newStatus,
-            trend: newTrend,
-            lastUpdate: 'Ahora'
-          };
+          return { ...patient, glucose: newGlucose, status: newStatus, trend: newTrend, lastUpdate: 'Ahora' };
         });
 
-        // Sync history after calculating new patients
-        setHistory((prevHistory: Record<string, { time: string, glucose: number }[]>) => {
-          const nextHistory = { ...prevHistory };
-          updatedPatients.forEach((patient: typeof patients[0]) => {
-            const h = nextHistory[patient.id] || [];
-            nextHistory[patient.id] = [...h, { time: timeStr, glucose: patient.glucose }].slice(-20);
+        // Safe history update outside the patient mapping but inside the tick context
+        // We use a timeout to place it in the next macro-task to avoid React strictly complaining about nested renders.
+        setTimeout(() => {
+          setHistory(prevHistory => {
+            const nextHistory = { ...prevHistory };
+            nextPatients.forEach(p => {
+              const h = nextHistory[p.id] || [];
+              nextHistory[p.id] = [...h, { time: timeStr, glucose: p.glucose }].slice(-30); // 30 points for a denser chart
+            });
+            return nextHistory;
           });
-          return nextHistory;
-        });
+        }, 0);
 
-        return updatedPatients;
+        return nextPatients;
       });
-    }, 5000); // Mueve cada 5 segundos en vida real
+    }, 2000); // Accelerated strictly to 2 seconds for high visibility
 
     return () => clearInterval(intervalId);
   }, [isLoggedIn]); // Solo ejecutamos si isLoggedIn cambia
