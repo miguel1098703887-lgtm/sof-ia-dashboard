@@ -25,7 +25,8 @@ import {
   ChevronRight,
   LogOut,
   Plus,
-  AlertCircle
+  AlertCircle,
+  CheckCircle2
 } from 'lucide-react';
 import { MOCK_PATIENTS as INITIAL_MOCK_PATIENTS, MOCK_NOTIFICATIONS } from '@/lib/mockData';
 import { validateRecommendation } from '@/lib/sidecarLogic';
@@ -50,6 +51,7 @@ export default function SofIAApp() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [loginError, setLoginError] = useState('');
+  const [notifications, setNotifications] = useState(MOCK_NOTIFICATIONS);
 
   // Login State
   const [loginId, setLoginId] = useState('');
@@ -113,12 +115,32 @@ export default function SofIAApp() {
           if (newGlucose > 450) newGlucose = 450;
 
           let newStatus = patient.status;
+          let isNewCritical = false;
           if (newGlucose < 70 || newGlucose > 250) {
+            if (newStatus !== 'critical') isNewCritical = true;
             newStatus = 'critical';
           } else if (newGlucose < 90 || newGlucose > 180) {
             newStatus = 'warning';
           } else {
             newStatus = 'stable';
+          }
+
+          if (isNewCritical) {
+            setTimeout(() => {
+              setNotifications(prev => {
+                const nowNotif = new Date();
+                const timeNotif = `${nowNotif.getHours()}:${nowNotif.getMinutes().toString().padStart(2, '0')}`;
+                const newNotif = {
+                  id: `n-${Date.now()}-${patient.id}`,
+                  patientId: patient.id,
+                  type: 'critical' as const,
+                  message: `${newGlucose < 70 ? 'Hipoglucemia' : 'Hiperglucemia'} detectada en ${patient.name}: ${newGlucose} mg/dL`,
+                  timestamp: timeNotif,
+                  isFiltered: false
+                };
+                return [newNotif, ...prev].slice(0, 10);
+              });
+            }, 0);
           }
 
           let newTrend = patient.trend;
@@ -358,7 +380,7 @@ export default function SofIAApp() {
 
             {showNotifications && (
               <div className="absolute top-14 right-48 w-80 h-[400px] z-50 shadow-2xl rounded-2xl border border-slate-200">
-                <NotificationTray notifications={MOCK_NOTIFICATIONS} />
+                <NotificationTray notifications={notifications} />
               </div>
             )}
 
@@ -471,9 +493,9 @@ export default function SofIAApp() {
                     )}
                   </div>
                 </div>
-                <div className="lg:col-span-4 h-full">
-                  <NotificationTray notifications={MOCK_NOTIFICATIONS} />
-                </div>
+                  <div className="lg:col-span-4 h-full">
+                    <NotificationTray notifications={notifications} />
+                  </div>
               </div>
             </div>
           )}
