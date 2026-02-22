@@ -42,6 +42,15 @@ export default function SofIAApp() {
   const [patients, setPatients] = useState(INITIAL_MOCK_PATIENTS);
   const [history, setHistory] = useState<Record<string, { time: string, glucose: number }[]>>({});
   
+  // Functional States
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showAddPatient, setShowAddPatient] = useState(false);
+  const [newPatientName, setNewPatientName] = useState('');
+  const [showProfile, setShowProfile] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [loginError, setLoginError] = useState('');
+  
   // Login State
   const [loginId, setLoginId] = useState('');
   const [loginPass, setLoginPass] = useState('');
@@ -50,6 +59,16 @@ export default function SofIAApp() {
   const [llmDose, setLlmDose] = useState(2);
   const [lastDoseHours, setLastDoseHours] = useState(1.5);
 
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3000);
+  };
+
+  const filteredPatients = patients.filter(p => 
+    p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    p.id.includes(searchQuery)
+  );
+  
   const selectedPatient = patients.find(p => p.id === selectedPatientId);
 
   // Glucose Simulation Effect
@@ -169,13 +188,20 @@ export default function SofIAApp() {
                 </div>
               </div>
 
+              {loginError && (
+                <div className="bg-red-50 text-red-600 p-4 rounded-xl border border-red-200 text-sm font-bold animate-pulse">
+                  {loginError}
+                </div>
+              )}
+
               <div className="pt-4 space-y-4">
                 <button 
                   onClick={() => {
                     if (loginId === 'DR-JOHANA-2026' && loginPass === 'password') {
                       setIsLoggedIn(true);
+                      setLoginError('');
                     } else {
-                      alert('VERIFICACIÓN FALLIDA\n\nLas credenciales no coinciden con el registro central.');
+                      setLoginError('VERIFICACIÓN FALLIDA: Las credenciales no coinciden.');
                     }
                   }}
                   className="w-full py-5 bg-blue-600 text-white rounded-2xl font-black text-lg hover:bg-blue-700 transition-all shadow-2xl shadow-blue-500/30 active:scale-[0.98] flex items-center justify-center gap-3"
@@ -300,14 +326,21 @@ export default function SofIAApp() {
            <div className="flex items-center gap-4 bg-slate-100 px-4 py-2 rounded-xl w-96">
               <Search size={18} className="text-slate-400" />
               <input type="text" placeholder="Buscar pacientes o reportes..." className="bg-transparent text-sm font-medium outline-none w-full" 
-                onKeyDown={(e) => e.key === 'Enter' && alert(`Buscando: ${e.currentTarget.value}\nEstado: Indexando registros clínicos...`)} />
+                value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
            </div>
-           <div className="flex items-center gap-6">
-              <div className="relative cursor-pointer" onClick={() => alert('Bandeja de Notificaciones\nEstado: 3 alertas críticas sin leer.')}>
+           <div className="flex items-center gap-6 relative">
+              <div className="relative cursor-pointer hover:bg-slate-100 p-2 rounded-full transition-colors" onClick={() => setShowNotifications(!showNotifications)}>
                  <Bell size={22} className="text-slate-400" />
-                 <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[8px] flex items-center justify-center text-white font-black">3</span>
+                 <span className="absolute top-0 right-0 w-4 h-4 bg-red-500 rounded-full text-[8px] flex items-center justify-center text-white font-black">3</span>
               </div>
-              <div className="flex items-center gap-3 cursor-pointer" onClick={() => alert('Perfil de Usuario: Dra. Johana\nUbicación: Onzaga, Santander\nEstado: Conectada')}>
+              
+              {showNotifications && (
+                 <div className="absolute top-14 right-48 w-80 h-[400px] z-50 shadow-2xl rounded-2xl border border-slate-200">
+                    <NotificationTray notifications={MOCK_NOTIFICATIONS} />
+                 </div>
+              )}
+
+              <div className="flex items-center gap-3 cursor-pointer hover:bg-slate-50 p-2 rounded-xl transition-colors relative" onClick={() => setShowProfile(!showProfile)}>
                  <div className="text-right">
                     <p className="text-xs font-black text-slate-900 leading-none">Dra. Johana</p>
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Onzaga, Santander</p>
@@ -315,6 +348,20 @@ export default function SofIAApp() {
                  <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center border-2 border-white shadow-sm ring-2 ring-blue-50">
                     <User size={20} className="text-blue-600" />
                  </div>
+
+                 {showProfile && (
+                    <div className="absolute top-16 right-0 w-64 bg-white border border-slate-200 rounded-2xl shadow-xl p-4 z-[60]">
+                       <h4 className="font-black text-slate-900 border-b pb-2 mb-2">Perfil Facultativo</h4>
+                       <div className="space-y-3">
+                          <p className="text-xs text-slate-600"><b>ID:</b> DR-JOHANA-2026</p>
+                          <p className="text-xs text-slate-600"><b>Ubicación:</b> CAP Onzaga</p>
+                          <p className="text-xs text-slate-600 flex items-center gap-2"><span className="w-2 h-2 inline-block bg-emerald-500 rounded-full"></span> En Linea</p>
+                          <button onClick={() => setIsLoggedIn(false)} className="w-full mt-2 py-2 bg-red-50 text-red-600 rounded-lg text-xs font-bold hover:bg-red-100 transition-colors">
+                             Cerrar Sesión Local
+                          </button>
+                       </div>
+                    </div>
+                 )}
               </div>
            </div>
         </header>
@@ -330,7 +377,7 @@ export default function SofIAApp() {
                     <h2 className="text-4xl font-black text-slate-900 tracking-tighter">Hola, Dra. Johana 👋</h2>
                     <p className="text-slate-500 font-medium">Hay 10 pacientes activos bajo monitoreo en tiempo real.</p>
                   </div>
-          <button className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-100" onClick={() => alert('Función: Vincular Nuevo Paciente\nEstado: Apertura de escáner biométrico y formulario de registro SaMD.')}>
+          <button className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-100" onClick={() => setShowAddPatient(true)}>
                     <Plus size={20} />
                     Vincular Nuevo Paciente
                   </button>
@@ -367,11 +414,14 @@ export default function SofIAApp() {
                        <button onClick={() => setCurrentView('patients')} className="text-blue-600 text-sm font-bold flex items-center gap-1 hover:underline">Ver todos <ChevronRight size={16}/></button>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {patients.slice(0, 4).map(p => (
-                  <div key={p.id} onClick={() => { setSelectedPatientId(p.id); setCurrentView('patients'); }} className="cursor-pointer">
+                {filteredPatients.slice(0, 4).map(p => (
+                  <div key={p.id} onClick={() => { setSelectedPatientId(p.id); setCurrentView('patients'); }} className="cursor-pointer transition-transform hover:-translate-y-1">
                     <PatientCard patient={p} />
                   </div>
                 ))}
+                {filteredPatients.length === 0 && (
+                  <p className="col-span-2 text-center text-slate-400 font-bold py-10">Ningún paciente coincide con la búsqueda.</p>
+                )}
               </div>
             </div>
             <div className="lg:col-span-4 h-full">
@@ -394,11 +444,14 @@ export default function SofIAApp() {
          
          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 h-full pb-20">
             <div className="lg:col-span-4 overflow-y-auto pr-2 space-y-3 custom-scrollbar">
-               {patients.map(p => (
-                 <div key={p.id} onClick={() => setSelectedPatientId(p.id)}>
+               {filteredPatients.map(p => (
+                 <div key={p.id} onClick={() => setSelectedPatientId(p.id)} className="cursor-pointer transition-transform hover:scale-[1.02]">
                    <PatientCard patient={p} isSelected={selectedPatientId === p.id} />
                  </div>
                ))}
+               {filteredPatients.length === 0 && (
+                  <p className="text-center text-slate-400 font-bold py-10">Ningún paciente encontrado.</p>
+               )}
             </div>
                   <div className="lg:col-span-8 h-full overflow-y-auto">
                      {selectedPatient ? (
@@ -506,8 +559,8 @@ export default function SofIAApp() {
                              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                 {['Ver Historial', 'Reportar Nota', 'Pedir Examen', 'Ajustar Bolo'].map(act => (
                                   <button key={act} 
-                                    onClick={() => alert(`Acción: ${act}\nPaciente: ${selectedPatient.name}\nEstado: Procesando requerimiento clínico...`)}
-                                    className="p-4 bg-slate-100 rounded-2xl font-bold text-xs text-slate-700 hover:bg-blue-600 hover:text-white transition-all">
+                                    onClick={() => showToast(`Acción rápida enviada: ${act} para ${selectedPatient.name}`)}
+                                    className="p-4 bg-slate-100 rounded-2xl font-bold text-xs text-slate-700 hover:bg-blue-600 hover:text-white transition-all active:scale-95">
                                      {act}
                                   </button>
                                 ))}
@@ -648,8 +701,8 @@ export default function SofIAApp() {
                          </div>
                       </div>
                       <button 
-                        onClick={() => alert('Certificación de Logs de Seguridad\nEstado: Generando reporte firmado digitalmente...\nUbicación: Santander, COL')}
-                        className="w-full mt-10 py-4 bg-slate-800 border border-slate-700 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-700 transition-all">
+                        onClick={() => showToast('Certificación de Logs generada exitosamente. Firma digital aplicada.')}
+                        className="w-full mt-10 py-4 bg-slate-800 border border-slate-700 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-700 transition-all active:scale-[0.98]">
                         Certificar Logs de Seguridad
                       </button>
                    </div>
@@ -675,6 +728,48 @@ export default function SofIAApp() {
           </button>
         ))}
       </nav>
+
+      {/* REUSABLE MODALS & TOASTS */}
+      {showAddPatient && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+           <div className="bg-white rounded-[32px] p-8 max-w-sm w-full shadow-2xl border border-slate-100 scale-100 animate-in fade-in zoom-in duration-200">
+              <div className="flex justify-between items-center mb-6">
+                 <h3 className="text-xl font-black text-slate-900">Vincular Paciente</h3>
+                 <button onClick={() => setShowAddPatient(false)} className="p-2 bg-slate-100 rounded-full hover:bg-slate-200"><X size={16} /></button>
+              </div>
+              <div className="space-y-4">
+                 <div>
+                    <label className="text-xs font-bold text-slate-600 mb-1 block">Nombre Completo</label>
+                    <input type="text" value={newPatientName} onChange={e => setNewPatientName(e.target.value)} placeholder="Ej. Carlos Mendoza" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-medium outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" />
+                 </div>
+                 <button onClick={() => {
+                    if(!newPatientName) return;
+                    const newP = {
+                       id: `p${Date.now()}`,
+                       name: newPatientName,
+                       age: 45,
+                       location: 'Zona Rural',
+                       status: 'stable',
+                       glucose: 100,
+                       trend: 'stable',
+                       lastUpdate: 'Ahora'
+                    };
+                    setPatients([newP as any, ...patients]);
+                    setShowAddPatient(false);
+                    setNewPatientName('');
+                    showToast('Paciente vinculado exitosamente');
+                 }} className="w-full py-4 bg-blue-600 text-white rounded-xl font-black shadow-lg shadow-blue-500/30 hover:bg-blue-700 transition-all">Confirmar Registro</button>
+              </div>
+           </div>
+        </div>
+      )}
+
+      {toastMessage && (
+        <div className="fixed bottom-24 right-4 lg:bottom-10 lg:right-10 bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-2xl z-[100] font-bold text-sm flex items-center gap-3 animate-in slide-in-from-bottom-5 fade-in duration-300">
+           <CheckCircle2 size={18} className="text-emerald-400" />
+           {toastMessage}
+        </div>
+      )}
     </div>
   );
 }
