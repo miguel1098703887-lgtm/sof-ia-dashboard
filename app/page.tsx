@@ -23,9 +23,10 @@ import {
   X,
   Search,
   ChevronRight,
-  LogOut,
   Plus,
-  AlertCircle
+  AlertCircle,
+  Volume2,
+  VolumeX
 } from 'lucide-react';
 import { MOCK_PATIENTS as INITIAL_MOCK_PATIENTS, MOCK_NOTIFICATIONS } from '@/lib/mockData';
 import { validateRecommendation } from '@/lib/sidecarLogic';
@@ -59,6 +60,15 @@ export default function SofIAApp() {
   const [llmDose, setLlmDose] = useState(2);
   const [lastDoseHours, setLastDoseHours] = useState(1.5);
 
+  // Config States
+  const [audioMuted, setAudioMuted] = useState(false);
+  const [thresholds, setThresholds] = useState({
+    hypoThreshold: 70,
+    hyperThreshold: 250,
+    maxInsulinDose: 10,
+    stackingHours: 3
+  });
+
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3000);
@@ -70,6 +80,59 @@ export default function SofIAApp() {
   );
 
   const selectedPatient = patients.find(p => p.id === selectedPatientId);
+
+  // LocalStorage Persistence - Initial Load
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedPatients = localStorage.getItem('sofia_patients');
+      if (savedPatients && JSON.parse(savedPatients).length > 0) setPatients(JSON.parse(savedPatients));
+
+      const savedHistory = localStorage.getItem('sofia_history');
+      if (savedHistory) setHistory(JSON.parse(savedHistory));
+
+      const savedThresholds = localStorage.getItem('sofia_thresholds');
+      if (savedThresholds) setThresholds(JSON.parse(savedThresholds));
+
+      const savedLogin = localStorage.getItem('sofia_login');
+      if (savedLogin === 'true') setIsLoggedIn(true);
+
+      const savedMute = localStorage.getItem('sofia_audio_muted');
+      if (savedMute) setAudioMuted(savedMute === 'true');
+    }
+  }, []);
+
+  // Save to LocalStorage
+  useEffect(() => {
+    if (isLoggedIn) {
+      localStorage.setItem('sofia_patients', JSON.stringify(patients));
+      localStorage.setItem('sofia_history', JSON.stringify(history));
+    }
+  }, [patients, history, isLoggedIn]);
+
+  useEffect(() => {
+    localStorage.setItem('sofia_thresholds', JSON.stringify(thresholds));
+    localStorage.setItem('sofia_audio_muted', String(audioMuted));
+  }, [thresholds, audioMuted]);
+
+  // Audio Alert Effect
+  useEffect(() => {
+    if (audioMuted || !isLoggedIn) return;
+    const hasCritical = patients.some(p => p.status === 'critical');
+    if (hasCritical) {
+      try {
+        const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        oscillator.type = 'sine';
+        oscillator.frequency.value = 800; // High pitch alert
+        gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
+        oscillator.start(audioCtx.currentTime);
+        oscillator.stop(audioCtx.currentTime + 0.1); // short beep
+      } catch (e) { /* ignore auto-play policies until user interacts */ }
+    }
+  }, [patients, audioMuted, isLoggedIn]);
 
   // Glucose Simulation Effect
   useEffect(() => {
@@ -113,9 +176,9 @@ export default function SofIAApp() {
           if (newGlucose > 450) newGlucose = 450;
 
           let newStatus = patient.status;
-          if (newGlucose < 70 || newGlucose > 250) {
+          if (newGlucose < thresholds.hypoThreshold || newGlucose > thresholds.hyperThreshold) {
             newStatus = 'critical';
-          } else if (newGlucose < 90 || newGlucose > 180) {
+          } else if (newGlucose < thresholds.hypoThreshold + 20 || newGlucose > thresholds.hyperThreshold - 70) {
             newStatus = 'warning';
           } else {
             newStatus = 'stable';
@@ -370,6 +433,13 @@ export default function SofIAApp() {
           <div className="flex items-center gap-6 relative">
             <div
               className="relative cursor-pointer hover:bg-slate-100 p-2 rounded-full transition-colors flex items-center justify-center"
+              onClick={() => setAudioMuted(!audioMuted)}
+            >
+              {audioMuted ? <VolumeX size={22} className="text-slate-400" /> : <Volume2 size={22} className="text-blue-500" />}
+            </div>
+
+            <div
+              className="relative cursor-pointer hover:bg-slate-100 p-2 rounded-full transition-colors flex items-center justify-center"
               onClick={() => {
                 setShowNotifications(!showNotifications);
                 setShowProfile(false);
@@ -486,7 +556,7 @@ export default function SofIAApp() {
                       })
                       .slice(0, 4).map(p => (
                         <div key={p.id} onClick={() => { setSelectedPatientId(p.id); setCurrentView('patients'); }} className="cursor-pointer transition-transform hover:-translate-y-1">
-                          <PatientCard patient={p} />
+                          <PatientCard patient={p} history={history[p.id]} />
                         </div>
                       ))}
                     {filteredPatients.length === 0 && (
@@ -516,7 +586,7 @@ export default function SofIAApp() {
                 <div className="lg:col-span-4 overflow-y-auto pr-2 space-y-3 custom-scrollbar">
                   {filteredPatients.map(p => (
                     <div key={p.id} onClick={() => setSelectedPatientId(p.id)} className="cursor-pointer transition-transform hover:scale-[1.02]">
-                      <PatientCard patient={p} isSelected={selectedPatientId === p.id} />
+                      <PatientCard patient={p} isSelected={selectedPatientId === p.id} history={history[p.id]} />
                     </div>
                   ))}
                   {filteredPatients.length === 0 && (
@@ -742,7 +812,7 @@ export default function SofIAApp() {
                     <ShieldCheck size={20} className="text-emerald-500" /> RESULTADO DE VALIDACIÓN SIDECAR
                   </h3>
                   {(() => {
-                    const audit = validateRecommendation(selectedPatient?.glucose || 100, llmDose, lastDoseHours);
+                    const audit = validateRecommendation(selectedPatient?.glucose || 100, llmDose, lastDoseHours, thresholds);
                     const mockAuditFull = {
                       id: 'sim', patientId: '0', timestamp: 'AHORA',
                       llmRecommendation: llmDose > 0 ? `Sugerir dosis correctiva de ${llmDose} unidades.` : "Sin acción requerida.",
@@ -761,25 +831,46 @@ export default function SofIAApp() {
           {/* VIEW: SETTINGS */}
           {currentView === 'settings' && (
             <div className="max-w-4xl mx-auto space-y-8 pb-20">
-              <h2 className="text-3xl font-black text-slate-900 tracking-tighter">Parámetros de Seguridad</h2>
+              <h2 className="text-3xl font-black text-slate-900 tracking-tighter">Parámetros de Seguridad GPC</h2>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="bg-white rounded-3xl p-8 border border-slate-200 space-y-6">
                   <h4 className="font-black text-slate-900 uppercase text-xs tracking-widest">Umbrales Deterministas</h4>
-                  {[
-                    { label: 'Dosis Máxima Permitida', value: '10 unidades', desc: 'Previene sobredosis accidentales del LLM.' },
-                    { label: 'Límite Hipoglucemia', value: '70 mg/dL', desc: 'Punto de bloqueo total de insulina.' },
-                    { label: 'Margen de Stacking', value: '3 horas', desc: 'Protección contra el apilamiento de dosis.' },
-                    { label: 'Alerta Crisis Hiper', value: '250 mg/dL', desc: 'Gatillo para escalamiento hospitalario.' },
-                  ].map(s => (
-                    <div key={s.label} className="flex flex-col gap-1">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm font-bold text-slate-700">{s.label}</span>
-                        <span className="text-sm font-black text-blue-600">{s.value}</span>
-                      </div>
-                      <p className="text-[10px] text-slate-400 font-medium">{s.desc}</p>
+
+                  <div className="space-y-6">
+                    <div className="space-y-2">
+                      <label className="text-xs font-black text-slate-700 uppercase flex justify-between">
+                        Límite Hipoglucemia <span className="text-red-500 font-black">{thresholds.hypoThreshold} mg/dL</span>
+                      </label>
+                      <input type="range" min="40" max="90" value={thresholds.hypoThreshold} onChange={(e) => setThresholds({ ...thresholds, hypoThreshold: parseInt(e.target.value) })} className="w-full h-3 bg-red-100 rounded-full appearance-none cursor-pointer accent-red-500" />
+                      <p className="text-[10px] text-slate-400 font-medium">Punto de bloqueo total de insulina por riesgo neurológico.</p>
                     </div>
-                  ))}
+                    <div className="space-y-2">
+                      <label className="text-xs font-black text-slate-700 uppercase flex justify-between">
+                        Alerta Crítica Hiper <span className="text-red-500 font-black">{thresholds.hyperThreshold} mg/dL</span>
+                      </label>
+                      <input type="range" min="180" max="350" value={thresholds.hyperThreshold} onChange={(e) => setThresholds({ ...thresholds, hyperThreshold: parseInt(e.target.value) })} className="w-full h-3 bg-red-100 rounded-full appearance-none cursor-pointer accent-red-500" />
+                      <p className="text-[10px] text-slate-400 font-medium">Gatillo para escalamiento hospitalario por riesgo CAD.</p>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-black text-slate-700 uppercase flex justify-between">
+                        Dosis Máxima de Insulina <span className="text-blue-500 font-black">{thresholds.maxInsulinDose} U</span>
+                      </label>
+                      <input type="range" min="5" max="25" value={thresholds.maxInsulinDose} onChange={(e) => setThresholds({ ...thresholds, maxInsulinDose: parseInt(e.target.value) })} className="w-full h-3 bg-blue-100 rounded-full appearance-none cursor-pointer accent-blue-500" />
+                      <p className="text-[10px] text-slate-400 font-medium">Filtro anti-alucinaciones LLM para prevenir sobredosis letal.</p>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-black text-slate-700 uppercase flex justify-between">
+                        Vida Media Stacking <span className="text-blue-500 font-black">{thresholds.stackingHours} h</span>
+                      </label>
+                      <input type="range" min="1" max="6" step="0.5" value={thresholds.stackingHours} onChange={(e) => setThresholds({ ...thresholds, stackingHours: parseFloat(e.target.value) })} className="w-full h-3 bg-blue-100 rounded-full appearance-none cursor-pointer accent-blue-500" />
+                      <p className="text-[10px] text-slate-400 font-medium">Protección farmacocinética contra apilamiento.</p>
+                    </div>
+                  </div>
+
+                  <button onClick={() => showToast('Nuevos umbrales clínicos guardados exitosamente.')} className="w-full mt-4 bg-slate-900 text-white py-4 rounded-xl font-black shadow-lg shadow-slate-200">
+                    Aplicar Nuevas Guías Médicas
+                  </button>
                 </div>
 
                 <div className="bg-slate-900 text-white rounded-3xl p-8 space-y-6 relative overflow-hidden shadow-xl shadow-slate-200">
