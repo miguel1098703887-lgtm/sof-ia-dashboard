@@ -533,12 +533,18 @@ export default function SofIAApp() {
                             Tendencia Estable
                           </div>
                         </div>
-                        <div className="bg-blue-600 text-white p-8 rounded-3xl relative overflow-hidden">
-                          <div className="absolute top-0 right-0 p-4 opacity-20"><ShieldCheck size={40} /></div>
+                        <div
+                          className="bg-blue-600 text-white p-8 rounded-3xl relative overflow-hidden cursor-pointer hover:bg-blue-700 transition-all hover:-translate-y-1 shadow-lg shadow-blue-500/30 group"
+                          onClick={() => {
+                            setCurrentView('audit');
+                            showToast(`Abriendo el panel de auditoría SaMD`);
+                          }}
+                        >
+                          <div className="absolute top-0 right-0 p-4 opacity-20 group-hover:scale-110 transition-transform"><ShieldCheck size={40} /></div>
                           <p className="text-[10px] font-black text-blue-100 uppercase tracking-[0.2em] mb-4">Bioseguridad Activa</p>
-                          <div className="text-xl font-black mb-2">Limitador Sidecar</div>
+                          <div className="text-xl font-black mb-2 flex items-center gap-2">Limitador Sidecar <ChevronRight size={18} className="opacity-50" /></div>
                           <p className="text-xs font-medium text-blue-100 opacity-80 leading-relaxed">
-                            El sistema de triaje autónomo está validando los parámetros del gemelo digital contra las GPC de Colombia.
+                            El sistema de triaje autónomo está validando los parámetros del gemelo digital contra las GPC de Colombia. Haz clic para auditar.
                           </p>
                         </div>
                       </div>
@@ -604,13 +610,37 @@ export default function SofIAApp() {
                           <Plus size={16} className="text-blue-600" /> Acciones Rápidas
                         </h4>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                          {['Ver Historial', 'Reportar Nota', 'Pedir Examen', 'Ajustar Bolo'].map(act => (
-                            <button key={act}
-                              onClick={() => showToast(`Acción rápida enviada: ${act} para ${selectedPatient.name}`)}
-                              className="p-4 bg-slate-100 rounded-2xl font-bold text-xs text-slate-700 hover:bg-blue-600 hover:text-white transition-all active:scale-95">
-                              {act}
-                            </button>
-                          ))}
+                          <button
+                            onClick={() => showToast(`Cargando historial completo de ${selectedPatient.name}...`)}
+                            className="p-4 bg-slate-100 rounded-2xl font-bold text-xs text-slate-700 hover:bg-slate-200 hover:text-slate-900 transition-all active:scale-95 flex flex-col items-center justify-center gap-2"
+                          >
+                            <Menu size={18} className="text-slate-500" />
+                            Ver Historial
+                          </button>
+                          <button
+                            onClick={() => showToast(`Formulario de nota clínica abierto`)}
+                            className="p-4 bg-slate-100 rounded-2xl font-bold text-xs text-slate-700 hover:bg-slate-200 hover:text-slate-900 transition-all active:scale-95 flex flex-col items-center justify-center gap-2"
+                          >
+                            <User size={18} className="text-slate-500" />
+                            Reportar Nota
+                          </button>
+                          <button
+                            onClick={() => showToast(`Solicitud de laboratorio enviada para ${selectedPatient.name}`)}
+                            className="p-4 bg-slate-100 rounded-2xl font-bold text-xs text-slate-700 hover:bg-slate-200 hover:text-slate-900 transition-all active:scale-95 flex flex-col items-center justify-center gap-2"
+                          >
+                            <AlertCircle size={18} className="text-slate-500" />
+                            Pedir Examen
+                          </button>
+                          <button
+                            onClick={() => {
+                              setCurrentView('audit');
+                              showToast(`El asistente te guiará para calcular el bolo de forma segura.`);
+                            }}
+                            className="p-4 bg-blue-50 border-2 border-blue-100 rounded-2xl font-bold text-xs text-blue-700 hover:bg-blue-600 hover:text-white transition-all active:scale-95 flex flex-col items-center justify-center gap-2 group"
+                          >
+                            <ShieldCheck size={18} className="text-blue-500 group-hover:text-white" />
+                            Ajustar Bolo
+                          </button>
                         </div>
                       </div>
                     </div>
