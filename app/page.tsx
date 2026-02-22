@@ -749,7 +749,7 @@ export default function SofIAApp() {
               </div>
               <button onClick={() => {
                 if (!newPatientName) return;
-                const newP = {
+                const newP: typeof patients[0] = {
                   id: `p${Date.now()}`,
                   name: newPatientName,
                   age: 45,
@@ -757,9 +757,10 @@ export default function SofIAApp() {
                   status: 'stable',
                   glucose: 100,
                   trend: 'stable',
+                  tir: Math.floor(Math.random() * (95 - 65 + 1)) + 65,
                   lastUpdate: 'Ahora'
                 };
-                setPatients([newP as any, ...patients]);
+                setPatients([newP, ...patients]);
                 setShowAddPatient(false);
                 setNewPatientName('');
                 showToast('Paciente vinculado exitosamente');
