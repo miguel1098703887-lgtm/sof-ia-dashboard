@@ -350,7 +350,7 @@ export default function SofIAApp() {
         <header className="h-20 bg-white border-b border-slate-200 hidden lg:flex items-center justify-between px-10">
           <div className="flex items-center gap-4 bg-slate-100 px-4 py-2 rounded-xl w-96">
             <Search size={18} className="text-slate-400" />
-            <input type="text" placeholder="Buscar pacientes o reportes..." className="bg-transparent text-sm font-medium outline-none w-full"
+            <input type="text" placeholder="Buscar pacientes o reportes..." className="bg-transparent text-slate-900 placeholder:text-slate-400 text-sm font-medium outline-none w-full"
               value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
           </div>
           <div className="flex items-center gap-6 relative">
@@ -816,7 +816,7 @@ export default function SofIAApp() {
             <div className="space-y-4">
               <div>
                 <label className="text-xs font-bold text-slate-600 mb-1 block">Nombre Completo</label>
-                <input type="text" value={newPatientName} onChange={e => setNewPatientName(e.target.value)} placeholder="Ej. Carlos Mendoza" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-medium outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" />
+                <input type="text" value={newPatientName} onChange={e => setNewPatientName(e.target.value)} placeholder="Ej. Carlos Mendoza" className="w-full p-4 bg-slate-50 text-slate-900 placeholder:text-slate-400 border border-slate-200 rounded-xl font-medium outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" />
               </div>
               <button onClick={() => {
                 if (!newPatientName) return;
