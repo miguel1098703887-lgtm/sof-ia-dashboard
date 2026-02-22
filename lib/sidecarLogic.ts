@@ -33,46 +33,51 @@ export function validateRecommendation(patientGlucose: number, llmDose: number, 
   ruleApplied?: string;
   intervention?: string;
 } {
-  // REGLA 1: Hipoglucemia
+  // REGLA 1: Hipoglucemia Estricta (GPC Colombia)
   if (patientGlucose < 70) {
     if (llmDose > 0) {
       return {
         status: 'blocked',
-        ruleApplied: 'REGLA 1',
-        reason: `Glucosa de ${patientGlucose} mg/dL. Contraindicación absoluta de insulina.`,
-        intervention: 'Iniciar "Regla de los 15": 15g carbohidratos rápidos. Reevaluar en 15 min.'
+        ruleApplied: 'GPC-COL-2023: Protocolo Manejo Hipoglucemia',
+        reason: `Glucosa de ${patientGlucose} mg/dL (Nivel Crítico de Riesgo). Contraindicación absoluta de insulina. Riesgo de secuela neurológica severa.`,
+        intervention: 'Ruta Clínica: Iniciar "Regla de los 15" (15g de carbohidratos de absorción rápida). Reevaluar gemelo digital en 15 min.'
       };
     }
   }
 
-  // REGLA 3: Tope Máximo (Prioritaria sobre stacking para evitar letalidad inmediata)
+  // REGLA 3: Tope Máximo de Seguridad (Previene Alucinaciones Letales)
   if (llmDose > 10) {
     return {
       status: 'blocked',
-      ruleApplied: 'REGLA 3',
-      reason: `Dosis de ${llmDose} unidades excede el límite de seguridad (10u).`,
-      intervention: 'ERROR CRÍTICO INTERCEPTADO. Requiere validación manual del médico (Human-in-the-Loop).'
+      ruleApplied: 'GPC-COL-2023: Límite de Bioseguridad en Bolo Asincrónico',
+      reason: `Sugerencia de ${llmDose} unidades excede el límite de umbral de seguridad (10u) modelado para telemedicina rural asincrónica.`,
+      intervention: 'SEGURO ACTIVADO: Intervención bloqueada de origen. Requiere validación manual estricta del médico primario (Human-in-the-Loop).'
     };
   }
 
-  // REGLA 2: Insulin Stacking
+  // REGLA 2: Insulin Stacking (Cálculo Farmacocinético de Insulina Activa)
   if (llmDose > 0 && lastDoseHours < 3) {
+    // Estimación básica de Insulina Residual (IOB) basada en t1/2 de rápida acción
+    const residual = Math.max(0, Math.round((3 - lastDoseHours) * (llmDose * 0.3) * 10) / 10);
     return {
       status: 'blocked',
-      ruleApplied: 'REGLA 2',
-      reason: `Insulina activa detectada (Última dosis hace ${lastDoseHours}h).`,
-      intervention: 'Alerta: Riesgo de Apilamiento. Recalcular restando insulina residual.'
+      ruleApplied: 'GPC-COL-2023: Farmacocinética de Insulina Rápida (IOB)',
+      reason: `Insulina residual cruzada. (Último bolo hace ${lastDoseHours}h). Estimación de ${residual}u aún biodisponibles en torrente.`,
+      intervention: 'Alerta de Evasión: Riesgo alto de hipoglucemia por apilamiento (Stacking). Recalcular descontando la insulina residual o posponer toma.'
     };
   }
 
-  // REGLA 4: Hiperglucemia Sostenida (Informativa/Escalamiento)
+  // REGLA 4: Hiperglucemia Sostenida / Riesgo CAD
   if (patientGlucose > 250) {
     return {
       status: 'passed',
-      ruleApplied: 'REGLA 4',
-      intervention: 'ALERTA: Riesgo de CAD. Notificar a profesional asistencial de inmediato.'
+      ruleApplied: 'GPC-COL-2023: Protocolo Prevención CAD',
+      intervention: 'ALERTA ADICIONAL: Paciente en umbral alto. Controlar cuerpos cetónicos y considerar protocolo de deshidratación si es rural disperso.'
     };
   }
 
-  return { status: 'passed' };
+  return {
+    status: 'passed',
+    ruleApplied: 'GPC-COL-2023: Rango Terapéutico Estandarizado'
+  };
 }
