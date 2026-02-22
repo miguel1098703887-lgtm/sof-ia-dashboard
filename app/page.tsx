@@ -258,14 +258,15 @@ export default function SofIAApp() {
         <header className="h-20 bg-white border-b border-slate-200 hidden lg:flex items-center justify-between px-10">
            <div className="flex items-center gap-4 bg-slate-100 px-4 py-2 rounded-xl w-96">
               <Search size={18} className="text-slate-400" />
-              <input type="text" placeholder="Buscar pacientes o reportes..." className="bg-transparent text-sm font-medium outline-none w-full" />
+              <input type="text" placeholder="Buscar pacientes o reportes..." className="bg-transparent text-sm font-medium outline-none w-full" 
+                onKeyDown={(e) => e.key === 'Enter' && alert(`Buscando: ${e.currentTarget.value}\nEstado: Indexando registros clínicos...`)} />
            </div>
            <div className="flex items-center gap-6">
-              <div className="relative">
+              <div className="relative cursor-pointer" onClick={() => alert('Bandeja de Notificaciones\nEstado: 3 alertas críticas sin leer.')}>
                  <Bell size={22} className="text-slate-400" />
                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[8px] flex items-center justify-center text-white font-black">3</span>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 cursor-pointer" onClick={() => alert('Perfil de Usuario: Dra. Johana\nUbicación: Onzaga, Santander\nEstado: Conectada')}>
                  <div className="text-right">
                     <p className="text-xs font-black text-slate-900 leading-none">Dra. Johana</p>
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Onzaga, Santander</p>
@@ -288,28 +289,28 @@ export default function SofIAApp() {
                     <h2 className="text-4xl font-black text-slate-900 tracking-tighter">Hola, Dra. Johana 👋</h2>
                     <p className="text-slate-500 font-medium">Hay 10 pacientes activos bajo monitoreo en tiempo real.</p>
                   </div>
-                  <button className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-100">
+          <button className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-100" onClick={() => alert('Función: Vincular Nuevo Paciente\nEstado: Apertura de escáner biométrico y formulario de registro SaMD.')}>
                     <Plus size={20} />
                     Vincular Nuevo Paciente
                   </button>
                </div>
 
                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                 <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                 <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 cursor-pointer hover:bg-slate-50 transition-all" onClick={() => setCurrentView('patients')}>
                     <div className="w-12 h-12 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center mb-4">
                        <AlertCircle size={24} />
                     </div>
                     <h3 className="text-3xl font-black text-slate-900 leading-none">3</h3>
                     <p className="text-sm font-bold text-slate-400 uppercase tracking-widest mt-1">Alertas Críticas</p>
                  </div>
-                 <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                 <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 cursor-pointer hover:bg-slate-50 transition-all" onClick={() => setCurrentView('patients')}>
                     <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mb-4">
                        <Users size={24} />
                     </div>
                     <h3 className="text-3xl font-black text-slate-900 leading-none">10</h3>
                     <p className="text-sm font-bold text-slate-400 uppercase tracking-widest mt-1">Telemonitoreos</p>
                  </div>
-                 <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                 <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 cursor-pointer hover:bg-slate-50 transition-all" onClick={() => setCurrentView('audit')}>
                     <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mb-4">
                        <ShieldCheck size={24} />
                     </div>
@@ -463,7 +464,9 @@ export default function SofIAApp() {
                              </h4>
                              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                 {['Ver Historial', 'Reportar Nota', 'Pedir Examen', 'Ajustar Bolo'].map(act => (
-                                  <button key={act} className="p-4 bg-slate-100 rounded-2xl font-bold text-xs text-slate-700 hover:bg-blue-600 hover:text-white transition-all">
+                                  <button key={act} 
+                                    onClick={() => alert(`Acción: ${act}\nPaciente: ${selectedPatient.name}\nEstado: Procesando requerimiento clínico...`)}
+                                    className="p-4 bg-slate-100 rounded-2xl font-bold text-xs text-slate-700 hover:bg-blue-600 hover:text-white transition-all">
                                      {act}
                                   </button>
                                 ))}
@@ -603,7 +606,9 @@ export default function SofIAApp() {
                             <p className="text-sm font-bold">Protocolo Rural Edges Activo</p>
                          </div>
                       </div>
-                      <button className="w-full mt-10 py-4 bg-slate-800 border border-slate-700 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-700 transition-all">
+                      <button 
+                        onClick={() => alert('Certificación de Logs de Seguridad\nEstado: Generando reporte firmado digitalmente...\nUbicación: Santander, COL')}
+                        className="w-full mt-10 py-4 bg-slate-800 border border-slate-700 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-700 transition-all">
                         Certificar Logs de Seguridad
                       </button>
                    </div>
