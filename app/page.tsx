@@ -423,7 +423,7 @@ export default function SofIAApp() {
               <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div>
                   <h2 className="text-4xl font-black text-slate-900 tracking-tighter">Hola, Dra. Johana 👋</h2>
-                  <p className="text-slate-500 font-medium">Hay 10 pacientes activos bajo monitoreo en tiempo real.</p>
+                  <p className="text-slate-500 font-medium">Hay {patients.length} pacientes activos bajo monitoreo en tiempo real.</p>
                 </div>
                 <button className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-100" onClick={() => setShowAddPatient(true)}>
                   <Plus size={20} />
@@ -436,14 +436,14 @@ export default function SofIAApp() {
                   <div className="w-12 h-12 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center mb-4">
                     <AlertCircle size={24} />
                   </div>
-                  <h3 className="text-3xl font-black text-slate-900 leading-none">3</h3>
+                  <h3 className="text-3xl font-black text-slate-900 leading-none">{patients.filter(p => p.status === 'critical').length}</h3>
                   <p className="text-sm font-bold text-slate-400 uppercase tracking-widest mt-1">Alertas Críticas</p>
                 </div>
                 <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 cursor-pointer hover:bg-slate-50 transition-all" onClick={() => setCurrentView('patients')}>
                   <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mb-4">
                     <Users size={24} />
                   </div>
-                  <h3 className="text-3xl font-black text-slate-900 leading-none">10</h3>
+                  <h3 className="text-3xl font-black text-slate-900 leading-none">{patients.length}</h3>
                   <p className="text-sm font-bold text-slate-400 uppercase tracking-widest mt-1">Telemonitoreos</p>
                 </div>
                 <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 cursor-pointer hover:bg-slate-50 transition-all" onClick={() => setCurrentView('audit')}>
@@ -462,11 +462,19 @@ export default function SofIAApp() {
                     <button onClick={() => setCurrentView('patients')} className="text-blue-600 text-sm font-bold flex items-center gap-1 hover:underline">Ver todos <ChevronRight size={16} /></button>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {filteredPatients.slice(0, 4).map(p => (
-                      <div key={p.id} onClick={() => { setSelectedPatientId(p.id); setCurrentView('patients'); }} className="cursor-pointer transition-transform hover:-translate-y-1">
-                        <PatientCard patient={p} />
-                      </div>
-                    ))}
+                    {[...filteredPatients]
+                      .sort((a, b) => {
+                        if (a.status === 'critical' && b.status !== 'critical') return -1;
+                        if (b.status === 'critical' && a.status !== 'critical') return 1;
+                        if (a.status === 'warning' && b.status !== 'warning') return -1;
+                        if (b.status === 'warning' && a.status !== 'warning') return 1;
+                        return 0;
+                      })
+                      .slice(0, 4).map(p => (
+                        <div key={p.id} onClick={() => { setSelectedPatientId(p.id); setCurrentView('patients'); }} className="cursor-pointer transition-transform hover:-translate-y-1">
+                          <PatientCard patient={p} />
+                        </div>
+                      ))}
                     {filteredPatients.length === 0 && (
                       <p className="col-span-2 text-center text-slate-400 font-bold py-10">Ningún paciente coincide con la búsqueda.</p>
                     )}
