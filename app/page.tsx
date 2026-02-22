@@ -48,22 +48,47 @@ export default function SofIAApp() {
           <h1 className="text-3xl font-black text-center text-slate-900 tracking-tighter mb-2">Sof-IA Portal</h1>
           <p className="text-center text-slate-500 text-sm mb-8 uppercase font-bold tracking-widest">Acceso Clínico Bio-Seguro</p>
           
-          <div className="space-y-4">
-            <div>
-              <label className="text-[10px] font-bold text-slate-400 uppercase ml-1">Identificación Médica</label>
-              <input type="text" placeholder="ID Registro" className="w-full mt-1 p-4 bg-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium" defaultValue="DR-JOHANA-2026" />
-            </div>
-            <div>
-              <label className="text-[10px] font-bold text-slate-400 uppercase ml-1">Contraseña</label>
-              <input type="password" placeholder="••••••••" className="w-full mt-1 p-4 bg-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium" defaultValue="password" />
-            </div>
-            <button 
-              onClick={() => setIsLoggedIn(true)}
-              className="w-full py-4 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-200"
-            >
-              INGRESAR AL SISTEMA
-            </button>
-          </div>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.currentTarget);
+              const userId = formData.get('userId');
+              const password = formData.get('password');
+              
+              if (userId === 'DR-JOHANA-2026' && password === 'password') {
+                setIsLoggedIn(true);
+              } else {
+                alert('Credenciales incorrectas. Por favor, verifique su ID y contraseña.');
+              }
+            }} className="space-y-4">
+              <div>
+                <label className="text-[10px] font-bold text-slate-400 uppercase ml-1">Identificación Médica</label>
+                <input 
+                  name="userId"
+                  type="text" 
+                  placeholder="ID Registro" 
+                  className="w-full mt-1 p-4 bg-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium text-slate-900" 
+                  autoComplete="username"
+                  required
+                />
+              </div>
+              <div>
+                <label className="text-[10px] font-bold text-slate-400 uppercase ml-1">Contraseña</label>
+                <input 
+                  name="password"
+                  type="password" 
+                  placeholder="••••••••" 
+                  className="w-full mt-1 p-4 bg-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium text-slate-900" 
+                  autoComplete="current-password"
+                  required
+                />
+              </div>
+              <button 
+                type="submit"
+                className="w-full py-4 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-200"
+              >
+                INGRESAR AL SISTEMA
+              </button>
+            </form>
           <p className="mt-8 text-[10px] text-center text-slate-400 font-medium">
             SISTEMA CERTIFICADO SaMD CLASS IIa <br/> © 2026 PROYECTO SOF-IA
           </p>
