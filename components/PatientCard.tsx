@@ -24,26 +24,36 @@ export default function PatientCard({ patient, isSelected }: { patient: Patient,
     )}>
       <div className="flex justify-between items-start mb-4">
         <div className="flex gap-3">
-           <div className={cn("w-10 h-10 rounded-2xl flex items-center justify-center font-black text-sm", getStatusColor(patient.status))}>
-              {patient.glucose}
-           </div>
-           <div>
-              <h3 className="font-black text-slate-800 text-sm leading-tight group-hover:text-blue-600 transition-colors">{patient.name}</h3>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">{patient.location}</p>
-           </div>
+          <div className={cn(
+            "w-12 h-12 rounded-2xl flex flex-col items-center justify-center text-white font-black shadow-inner",
+            getStatusColor(patient.status)
+          )}>
+            <span className="text-lg leading-none">{patient.glucose}</span>
+            <span className="text-[8px] uppercase tracking-widest mt-0.5 flex items-center justify-center w-full">
+              {patient.trend === 'up' && <TrendingUp size={10} className="stroke-[4px]" />}
+              {patient.trend === 'down' && <TrendingDown size={10} className="stroke-[4px]" />}
+              {patient.trend === 'stable' && <Minus size={10} className="stroke-[4px]" />}
+            </span>
+          </div>
+          <div>
+            <h3 className="font-black text-slate-800 text-sm leading-tight group-hover:text-blue-600 transition-colors pt-1">{patient.name}</h3>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1 mt-1">
+              <MapPin size={10} /> {patient.location}
+            </p>
+          </div>
         </div>
-        <div className="text-slate-300 group-hover:text-blue-600 transition-all group-hover:translate-x-1">
-           <ChevronRight size={20} />
+        <div className="text-slate-200 group-hover:text-blue-500 transition-all group-hover:translate-x-1 mt-2">
+          <ChevronRight size={20} />
         </div>
       </div>
 
       <div className="flex items-center gap-4">
-         <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-            <div className="h-full bg-blue-600 rounded-full" style={{ width: `${patient.tir}%` }} />
-         </div>
-         <span className="text-[10px] font-black text-slate-500">{patient.tir}% TIR</span>
+        <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+          <div className="h-full bg-blue-600 rounded-full" style={{ width: `${patient.tir}%` }} />
+        </div>
+        <span className="text-[10px] font-black text-slate-500">{patient.tir}% TIR</span>
       </div>
-      
+
       {isSelected && (
         <div className="absolute top-0 right-0 w-16 h-16 bg-blue-600/5 rounded-bl-[3rem] -mr-4 -mt-4" />
       )}
