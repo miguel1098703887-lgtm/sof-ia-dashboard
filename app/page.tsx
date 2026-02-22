@@ -130,7 +130,7 @@ export default function SofIAApp() {
               <input 
                 type="text" 
                 placeholder="ID Registro" 
-                className="w-full mt-1 p-4 bg-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium text-slate-900 block" 
+                className="w-full mt-1 p-4 bg-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all font-bold text-black block" 
                 value={loginId}
                 onChange={(e) => setLoginId(e.target.value)}
                 autoFocus
@@ -141,7 +141,7 @@ export default function SofIAApp() {
               <input 
                 type="password" 
                 placeholder="••••••••" 
-                className="w-full mt-1 p-4 bg-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium text-slate-900 block" 
+                className="w-full mt-1 p-4 bg-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all font-bold text-black block" 
                 value={loginPass}
                 onChange={(e) => setLoginPass(e.target.value)}
               />
