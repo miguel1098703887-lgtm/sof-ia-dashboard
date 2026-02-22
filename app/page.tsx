@@ -16,7 +16,7 @@ import {
   Plus,
   AlertCircle
 } from 'lucide-react';
-import { MOCK_PATIENTS, MOCK_NOTIFICATIONS } from '@/lib/mockData';
+import { MOCK_PATIENTS as INITIAL_MOCK_PATIENTS, MOCK_NOTIFICATIONS } from '@/lib/mockData';
 import { validateRecommendation } from '@/lib/sidecarLogic';
 import PatientCard from '@/components/PatientCard';
 import SidecarAudit from '@/components/SidecarAudit';
@@ -28,12 +28,62 @@ export default function SofIAApp() {
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [patients, setPatients] = useState(INITIAL_MOCK_PATIENTS);
   
   // Simulation for Audit logic
   const [llmDose, setLlmDose] = useState(2);
   const [lastDoseHours, setLastDoseHours] = useState(1.5);
 
-  const selectedPatient = MOCK_PATIENTS.find(p => p.id === selectedPatientId);
+  const selectedPatient = patients.find(p => p.id === selectedPatientId);
+
+  // Glucose Simulation Effect
+  useEffect(() => {
+    if (!isLoggedIn) return;
+
+    const interval = setInterval(() => {
+      setPatients(prevPatients => prevPatients.map(patient => {
+        // Random walk for glucose
+        let change = Math.floor(Math.random() * 7) - 3; // -3 to +3
+        
+        // Add tendency logic
+        if (patient.trend === 'up') change += 1;
+        if (patient.trend === 'down') change -= 1;
+
+        let newGlucose = patient.glucose + change;
+        
+        // Bounds
+        if (newGlucose < 40) newGlucose = 40;
+        if (newGlucose > 450) newGlucose = 450;
+
+        // Update status based on new glucose
+        let newStatus = patient.status;
+        if (newGlucose < 70 || newGlucose > 250) {
+          newStatus = 'critical';
+        } else if (newGlucose < 90 || newGlucose > 180) {
+          newStatus = 'warning';
+        } else {
+          newStatus = 'stable';
+        }
+
+        // Update trend occasionally
+        let newTrend = patient.trend;
+        if (Math.random() > 0.9) {
+          const trends: ('up' | 'down' | 'stable')[] = ['up', 'down', 'stable'];
+          newTrend = trends[Math.floor(Math.random() * trends.length)];
+        }
+
+        return {
+          ...patient,
+          glucose: newGlucose,
+          status: newStatus,
+          trend: newTrend,
+          lastUpdate: 'Ahora'
+        };
+      }));
+    }, 5000); // Update every 5 seconds
+
+    return () => clearInterval(interval);
+  }, [isLoggedIn]);
 
   // Authentication Guard (Simulated)
   if (!isLoggedIn) {
@@ -253,39 +303,39 @@ export default function SofIAApp() {
                        <button onClick={() => setCurrentView('patients')} className="text-blue-600 text-sm font-bold flex items-center gap-1 hover:underline">Ver todos <ChevronRight size={16}/></button>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {MOCK_PATIENTS.slice(0, 4).map(p => (
-                        <div key={p.id} onClick={() => { setSelectedPatientId(p.id); setCurrentView('patients'); }} className="cursor-pointer">
-                          <PatientCard patient={p} />
-                        </div>
-                      ))}
-                    </div>
+                {patients.slice(0, 4).map(p => (
+                  <div key={p.id} onClick={() => { setSelectedPatientId(p.id); setCurrentView('patients'); }} className="cursor-pointer">
+                    <PatientCard patient={p} />
                   </div>
-                  <div className="lg:col-span-4 h-full">
-                     <NotificationTray notifications={MOCK_NOTIFICATIONS} />
-                  </div>
-               </div>
-             </div>
-           )}
+                ))}
+              </div>
+            </div>
+            <div className="lg:col-span-4 h-full">
+               <NotificationTray notifications={MOCK_NOTIFICATIONS} />
+            </div>
+         </div>
+       </div>
+     )}
 
-           {/* VIEW: PATIENTS LIST / DETAIL */}
-           {currentView === 'patients' && (
-             <div className="max-w-6xl mx-auto h-full flex flex-col">
-               <div className="flex justify-between items-center mb-8">
-                  <h2 className="text-3xl font-black text-slate-900 tracking-tighter">Gestión de Pacientes</h2>
-                  <div className="flex gap-2 bg-white p-1 rounded-xl border border-slate-200">
-                     <button className="px-4 py-2 text-xs font-bold bg-slate-100 rounded-lg">ACTIVOS</button>
-                     <button className="px-4 py-2 text-xs font-bold text-slate-400">HISTORIAL</button>
-                  </div>
-               </div>
-               
-               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 h-full pb-20">
-                  <div className="lg:col-span-4 overflow-y-auto pr-2 space-y-3 custom-scrollbar">
-                     {MOCK_PATIENTS.map(p => (
-                       <div key={p.id} onClick={() => setSelectedPatientId(p.id)}>
-                         <PatientCard patient={p} isSelected={selectedPatientId === p.id} />
-                       </div>
-                     ))}
-                  </div>
+     {/* VIEW: PATIENTS LIST / DETAIL */}
+     {currentView === 'patients' && (
+       <div className="max-w-6xl mx-auto h-full flex flex-col">
+         <div className="flex justify-between items-center mb-8">
+            <h2 className="text-3xl font-black text-slate-900 tracking-tighter">Gestión de Pacientes</h2>
+            <div className="flex gap-2 bg-white p-1 rounded-xl border border-slate-200">
+               <button className="px-4 py-2 text-xs font-bold bg-slate-100 rounded-lg">ACTIVOS</button>
+               <button className="px-4 py-2 text-xs font-bold text-slate-400">HISTORIAL</button>
+            </div>
+         </div>
+         
+         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 h-full pb-20">
+            <div className="lg:col-span-4 overflow-y-auto pr-2 space-y-3 custom-scrollbar">
+               {patients.map(p => (
+                 <div key={p.id} onClick={() => setSelectedPatientId(p.id)}>
+                   <PatientCard patient={p} isSelected={selectedPatientId === p.id} />
+                 </div>
+               ))}
+            </div>
                   <div className="lg:col-span-8 h-full overflow-y-auto">
                      {selectedPatient ? (
                        <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm h-full">
@@ -406,7 +456,7 @@ export default function SofIAApp() {
                             onChange={(e) => setSelectedPatientId(e.target.value)}
                             value={selectedPatientId || '2'}
                           >
-                             {MOCK_PATIENTS.map(p => <option key={p.id} value={p.id}>{p.name} ({p.glucose} mg/dL)</option>)}
+                             {patients.map(p => <option key={p.id} value={p.id}>{p.name} ({p.glucose} mg/dL)</option>)}
                           </select>
                        </div>
                     </div>
