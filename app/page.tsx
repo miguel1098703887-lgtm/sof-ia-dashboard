@@ -126,22 +126,24 @@ export default function SofIAApp() {
           
           <div className="space-y-4">
             <div>
-              <label className="text-[10px] font-bold text-slate-400 uppercase ml-1">Identificación Médica</label>
+              <label className="text-[12px] font-bold text-slate-900 uppercase ml-1">Identificación Médica</label>
               <input 
                 type="text" 
                 placeholder="ID Registro" 
-                className="w-full mt-1 p-4 bg-white border-2 border-slate-300 rounded-xl outline-none focus:ring-4 focus:ring-blue-500 focus:border-blue-600 transition-all font-black text-[18px] text-black block placeholder:text-slate-400" 
+                className="w-full mt-1 p-4 bg-white border-4 border-slate-900 rounded-xl outline-none focus:ring-4 focus:ring-blue-600 transition-all font-black text-[22px] text-black block placeholder:text-slate-500 shadow-[4px_4px_0px_#000000]" 
+                style={{ color: '#000000', backgroundColor: '#ffffff', opacity: 1, WebkitTextFillColor: '#000000' }}
                 value={loginId}
                 onChange={(e) => setLoginId(e.target.value)}
                 autoFocus
               />
             </div>
             <div>
-              <label className="text-[10px] font-bold text-slate-500 uppercase ml-1">Contraseña</label>
+              <label className="text-[12px] font-bold text-slate-900 uppercase ml-1">Contraseña</label>
               <input 
                 type="password" 
                 placeholder="••••••••" 
-                className="w-full mt-1 p-4 bg-white border-2 border-slate-300 rounded-xl outline-none focus:ring-4 focus:ring-blue-500 focus:border-blue-600 transition-all font-black text-[18px] text-black block placeholder:text-slate-400" 
+                className="w-full mt-1 p-4 bg-white border-4 border-slate-900 rounded-xl outline-none focus:ring-4 focus:ring-blue-600 transition-all font-black text-[22px] text-black block placeholder:text-slate-500 shadow-[4px_4px_0px_#000000]" 
+                style={{ color: '#000000', backgroundColor: '#ffffff', opacity: 1, WebkitTextFillColor: '#000000' }}
                 value={loginPass}
                 onChange={(e) => setLoginPass(e.target.value)}
               />
