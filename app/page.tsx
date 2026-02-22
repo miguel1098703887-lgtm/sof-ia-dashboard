@@ -114,63 +114,95 @@ export default function SofIAApp() {
   // Authentication Guard (Simulated)
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6">
-        <div className="max-w-md w-full bg-white rounded-3xl p-8 shadow-2xl">
-          <div className="flex justify-center mb-6">
-             <div className="bg-blue-600 p-4 rounded-2xl">
-                <ShieldCheck className="text-white" size={40} />
-             </div>
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4 sm:p-6 font-sans">
+        {/* Animated background elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-blue-900/20 rounded-full blur-[120px]" />
+          <div className="absolute -bottom-[10%] -right-[10%] w-[40%] h-[40%] bg-blue-800/10 rounded-full blur-[120px]" />
+        </div>
+
+        <div className="max-w-md w-full relative z-10">
+          <div className="bg-white rounded-[40px] p-8 sm:p-12 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)] border border-white/10">
+            <div className="flex justify-center mb-8">
+               <div className="bg-blue-600 p-5 rounded-3xl shadow-xl shadow-blue-500/20">
+                  <ShieldCheck className="text-white" size={48} />
+               </div>
+            </div>
+            
+            <div className="text-center mb-10">
+              <h1 className="text-4xl font-black text-slate-900 tracking-tight mb-2">Sof-IA Portal</h1>
+              <div className="flex items-center justify-center gap-2">
+                <span className="h-[1px] w-8 bg-slate-200" />
+                <p className="text-slate-500 text-[10px] uppercase font-black tracking-[0.3em]">Acceso Bio-Seguro</p>
+                <span className="h-[1px] w-8 bg-slate-200" />
+              </div>
+            </div>
+            
+            <div className="space-y-6">
+              <div className="group">
+                <label className="text-[11px] font-black text-slate-400 uppercase ml-1 block mb-2 transition-colors group-focus-within:text-blue-600">ID Facultativo</label>
+                <div className="relative">
+                  <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500" size={20} />
+                  <input 
+                    type="text" 
+                    placeholder="Ingrese su registro" 
+                    className="w-full pl-12 pr-4 py-5 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-bold text-[18px] text-slate-900 block placeholder:text-slate-300" 
+                    value={loginId}
+                    onChange={(e) => setLoginId(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="group">
+                <label className="text-[11px] font-black text-slate-400 uppercase ml-1 block mb-2 transition-colors group-focus-within:text-blue-600">Contraseña Maestra</label>
+                <div className="relative">
+                  <ShieldCheck className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500" size={20} />
+                  <input 
+                    type="password" 
+                    placeholder="••••••••" 
+                    className="w-full pl-12 pr-4 py-5 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-bold text-[18px] text-slate-900 block placeholder:text-slate-300" 
+                    value={loginPass}
+                    onChange={(e) => setLoginPass(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="pt-4 space-y-4">
+                <button 
+                  onClick={() => {
+                    if (loginId === 'DR-JOHANA-2026' && loginPass === 'password') {
+                      setIsLoggedIn(true);
+                    } else {
+                      alert('VERIFICACIÓN FALLIDA\n\nLas credenciales no coinciden con el registro central.');
+                    }
+                  }}
+                  className="w-full py-5 bg-blue-600 text-white rounded-2xl font-black text-lg hover:bg-blue-700 transition-all shadow-2xl shadow-blue-500/30 active:scale-[0.98] flex items-center justify-center gap-3"
+                >
+                  AUTORIZAR ACCESO
+                  <ChevronRight size={20} />
+                </button>
+                
+                <div className="relative flex items-center justify-center py-2">
+                  <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-100"></div></div>
+                  <span className="relative bg-white px-4 text-[10px] font-bold text-slate-300 uppercase tracking-widest">O</span>
+                </div>
+
+                <button 
+                  onClick={() => { setLoginId('DR-JOHANA-2026'); setLoginPass('password'); }}
+                  className="w-full py-4 border-2 border-dashed border-slate-200 text-slate-400 font-black text-xs rounded-2xl uppercase hover:border-blue-300 hover:text-blue-500 transition-all active:bg-blue-50"
+                >
+                  Usar Credenciales de Emergencia
+                </button>
+              </div>
+            </div>
+            
+            <div className="mt-12 text-center">
+              <p className="text-[9px] text-slate-400 font-bold uppercase tracking-[0.2em] leading-relaxed">
+                Sistema Certificado SaMD Clase IIa <br/>
+                Onzaga Monitor v2.4 • Santander, COL
+              </p>
+            </div>
           </div>
-          <h1 className="text-3xl font-black text-center text-slate-900 tracking-tighter mb-2">Sof-IA Portal</h1>
-          <p className="text-center text-slate-500 text-sm mb-8 uppercase font-bold tracking-widest">Acceso Clínico Bio-Seguro</p>
-          
-          <div className="space-y-8 mt-10">
-            <div className="bg-white p-6 rounded-3xl border-8 border-black shadow-[10px_10px_0px_#000000]">
-              <label className="text-[14px] font-black text-black uppercase block mb-3">ESCRIBE TU USUARIO AQUÍ:</label>
-              <input 
-                type="text" 
-                placeholder="EJ: DR-JOHANA-2026" 
-                className="w-full p-6 bg-slate-200 border-4 border-black rounded-xl font-black text-[28px] text-black block placeholder:text-slate-500" 
-                style={{ color: 'black', fontWeight: '900', opacity: '1' }}
-                value={loginId}
-                onChange={(e) => setLoginId(e.target.value)}
-              />
-            </div>
-            <div className="bg-white p-6 rounded-3xl border-8 border-black shadow-[10px_10px_0px_#000000]">
-              <label className="text-[14px] font-black text-black uppercase block mb-3">ESCRIBE TU CONTRASEÑA AQUÍ:</label>
-              <input 
-                type="password" 
-                placeholder="••••••••" 
-                className="w-full p-6 bg-slate-200 border-4 border-black rounded-xl font-black text-[28px] text-black block placeholder:text-slate-500" 
-                style={{ color: 'black', fontWeight: '900', opacity: '1' }}
-                value={loginPass}
-                onChange={(e) => setLoginPass(e.target.value)}
-              />
-            </div>
-            <div className="pt-4">
-              <button 
-                onClick={() => {
-                  if (loginId === 'DR-JOHANA-2026' && loginPass === 'password') {
-                    setIsLoggedIn(true);
-                  } else {
-                    alert('ERROR DE ACCESO.\n\nUSUARIO: DR-JOHANA-2026\nPASS: password');
-                  }
-                }}
-                className="w-full py-8 bg-blue-600 text-white rounded-3xl font-black text-2xl hover:bg-blue-700 transition-all border-b-[12px] border-blue-900 active:border-b-0 active:translate-y-2 shadow-2xl"
-              >
-                INGRESAR AL SISTEMA
-              </button>
-              <button 
-                onClick={() => { setLoginId('DR-JOHANA-2026'); setLoginPass('password'); }}
-                className="w-full py-6 bg-emerald-500 text-black font-black text-xl rounded-2xl uppercase mt-10 shadow-xl border-4 border-black active:bg-emerald-600"
-              >
-                ENTRAR SIN ESCRIBIR (CLIC AQUÍ)
-              </button>
-            </div>
-          </div>
-          <p className="mt-8 text-[10px] text-center text-slate-400 font-medium">
-            SISTEMA CERTIFICADO SaMD CLASS IIa <br/> © 2026 PROYECTO SOF-IA
-          </p>
         </div>
       </div>
     );
