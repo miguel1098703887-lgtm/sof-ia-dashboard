@@ -354,7 +354,13 @@ export default function SofIAApp() {
               value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
           </div>
           <div className="flex items-center gap-6 relative">
-            <div className="relative cursor-pointer hover:bg-slate-100 p-2 rounded-full transition-colors" onClick={() => setShowNotifications(!showNotifications)}>
+            <div
+              className="relative cursor-pointer hover:bg-slate-100 p-2 rounded-full transition-colors flex items-center justify-center"
+              onClick={() => {
+                setShowNotifications(!showNotifications);
+                setShowProfile(false);
+              }}
+            >
               <Bell size={22} className="text-slate-400" />
               <span className="absolute top-0 right-0 w-4 h-4 bg-red-500 rounded-full text-[8px] flex items-center justify-center text-white font-black">3</span>
             </div>
@@ -365,24 +371,41 @@ export default function SofIAApp() {
               </div>
             )}
 
-            <div className="flex items-center gap-3 cursor-pointer hover:bg-slate-50 p-2 rounded-xl transition-colors relative" onClick={() => setShowProfile(!showProfile)}>
+            <div
+              className="flex items-center gap-3 cursor-pointer hover:bg-slate-50 p-2 rounded-xl transition-colors relative"
+              onClick={() => {
+                setShowProfile(!showProfile);
+                setShowNotifications(false);
+              }}
+            >
               <div className="text-right">
                 <p className="text-xs font-black text-slate-900 leading-none">Dra. Johana</p>
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Onzaga, Santander</p>
               </div>
-              <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center border-2 border-white shadow-sm ring-2 ring-blue-50">
+              <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center border-2 border-white shadow-sm ring-2 ring-blue-50 relative">
                 <User size={20} className="text-blue-600" />
+                {/* Status Indicator */}
+                <div className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full"></div>
               </div>
 
               {showProfile && (
-                <div className="absolute top-16 right-0 w-64 bg-white border border-slate-200 rounded-2xl shadow-xl p-4 z-[60]">
-                  <h4 className="font-black text-slate-900 border-b pb-2 mb-2">Perfil Facultativo</h4>
+                <div
+                  className="absolute top-16 right-0 w-64 bg-white border border-slate-200 rounded-2xl shadow-xl p-4 z-[60]"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <h4 className="font-black text-slate-900 border-b pb-2 mb-2">Perfil Clínico</h4>
                   <div className="space-y-3">
                     <p className="text-xs text-slate-600"><b>ID:</b> DR-JOHANA-2026</p>
                     <p className="text-xs text-slate-600"><b>Ubicación:</b> CAP Onzaga</p>
-                    <p className="text-xs text-slate-600 flex items-center gap-2"><span className="w-2 h-2 inline-block bg-emerald-500 rounded-full"></span> En Linea</p>
-                    <button onClick={() => setIsLoggedIn(false)} className="w-full mt-2 py-2 bg-red-50 text-red-600 rounded-lg text-xs font-bold hover:bg-red-100 transition-colors">
-                      Cerrar Sesión Local
+                    <p className="text-xs text-slate-600 flex items-center gap-2"><span className="w-2 h-2 inline-block bg-emerald-500 rounded-full shadow-[0_0_5px_#10b981]"></span> Sesión Activa (SaMD)</p>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsLoggedIn(false);
+                      }}
+                      className="w-full mt-2 py-2 bg-red-50 text-red-600 rounded-lg text-xs font-bold hover:bg-red-100 transition-colors flex items-center justify-center gap-2"
+                    >
+                      <LogOut size={14} /> Cerrar Sesión Local
                     </button>
                   </div>
                 </div>
