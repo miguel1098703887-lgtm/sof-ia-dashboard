@@ -26,7 +26,9 @@ import {
   Plus,
   AlertCircle,
   Volume2,
-  VolumeX
+  VolumeX,
+  LogOut,
+  CheckCircle2
 } from 'lucide-react';
 import { MOCK_PATIENTS as INITIAL_MOCK_PATIENTS, MOCK_NOTIFICATIONS } from '@/lib/mockData';
 import { validateRecommendation } from '@/lib/sidecarLogic';
