@@ -726,11 +726,11 @@ export default function SofIAApp() {
                     <div className="bg-white p-6 rounded-2xl border border-blue-100 flex flex-col justify-center">
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 text-center">Paciente de Prueba</p>
                       <select
-                        className="w-full p-4 bg-slate-100 rounded-xl font-bold outline-none"
+                        className="w-full p-4 bg-white border-4 border-black rounded-xl outline-none focus:ring-0 focus:border-[5px] focus:border-blue-600 transition-all font-black text-lg text-[#000000] cursor-pointer"
                         onChange={(e) => setSelectedPatientId(e.target.value)}
                         value={selectedPatientId || '2'}
                       >
-                        {patients.map(p => <option key={p.id} value={p.id}>{p.name} ({p.glucose} mg/dL)</option>)}
+                        {patients.map(p => <option key={p.id} value={p.id} className="text-[#000000] font-black">{p.name} ({p.glucose} mg/dL)</option>)}
                       </select>
                     </div>
                   </div>
