@@ -27,14 +27,24 @@ export const SIDECAR_RULES: SidecarRule[] = [
   }
 ];
 
-export function validateRecommendation(patientGlucose: number, llmDose: number, lastDoseHours: number): {
+export function validateRecommendation(
+  patientGlucose: number,
+  llmDose: number,
+  lastDoseHours: number,
+  thresholds: {
+    hypoThreshold: number;
+    hyperThreshold: number;
+    maxInsulinDose: number;
+    stackingHours: number;
+  } = { hypoThreshold: 70, hyperThreshold: 250, maxInsulinDose: 10, stackingHours: 3 }
+): {
   status: 'passed' | 'blocked';
   reason?: string;
   ruleApplied?: string;
   intervention?: string;
 } {
   // REGLA 1: Hipoglucemia Estricta (GPC Colombia)
-  if (patientGlucose < 70) {
+  if (patientGlucose < thresholds.hypoThreshold) {
     if (llmDose > 0) {
       return {
         status: 'blocked',
@@ -46,19 +56,19 @@ export function validateRecommendation(patientGlucose: number, llmDose: number, 
   }
 
   // REGLA 3: Tope Máximo de Seguridad (Previene Alucinaciones Letales)
-  if (llmDose > 10) {
+  if (llmDose > thresholds.maxInsulinDose) {
     return {
       status: 'blocked',
       ruleApplied: 'GPC-COL-2023: Límite de Bioseguridad en Bolo Asincrónico',
-      reason: `Sugerencia de ${llmDose} unidades excede el límite de umbral de seguridad (10u) modelado para telemedicina rural asincrónica.`,
+      reason: `Sugerencia de ${llmDose} unidades excede el límite de umbral de seguridad (${thresholds.maxInsulinDose}u) modelado para telemedicina rural asincrónica.`,
       intervention: 'SEGURO ACTIVADO: Intervención bloqueada de origen. Requiere validación manual estricta del médico primario (Human-in-the-Loop).'
     };
   }
 
   // REGLA 2: Insulin Stacking (Cálculo Farmacocinético de Insulina Activa)
-  if (llmDose > 0 && lastDoseHours < 3) {
+  if (llmDose > 0 && lastDoseHours < thresholds.stackingHours) {
     // Estimación básica de Insulina Residual (IOB) basada en t1/2 de rápida acción
-    const residual = Math.max(0, Math.round((3 - lastDoseHours) * (llmDose * 0.3) * 10) / 10);
+    const residual = Math.max(0, Math.round((thresholds.stackingHours - lastDoseHours) * (llmDose * 0.3) * 10) / 10);
     return {
       status: 'blocked',
       ruleApplied: 'GPC-COL-2023: Farmacocinética de Insulina Rápida (IOB)',
@@ -68,7 +78,7 @@ export function validateRecommendation(patientGlucose: number, llmDose: number, 
   }
 
   // REGLA 4: Hiperglucemia Sostenida / Riesgo CAD
-  if (patientGlucose > 250) {
+  if (patientGlucose > thresholds.hyperThreshold) {
     return {
       status: 'passed',
       ruleApplied: 'GPC-COL-2023: Protocolo Prevención CAD',
